@@ -1,9 +1,7 @@
 package com.hubpd.bigscreen.controller;
 
-import com.hubpd.bigscreen.bean.Test;
-import com.hubpd.bigscreen.bean.User;
-import com.hubpd.bigscreen.service.TestService;
-import com.hubpd.bigscreen.service.UserService;
+import com.hubpd.bigscreen.bean.uar_basic.UarBasicUser;
+import com.hubpd.bigscreen.service.uar_basic.UarUserService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,31 +21,17 @@ import java.util.Map;
 @RequestMapping(value="/test")
 public class TestController {
     @Autowired
-    private TestService testService;
-    @Autowired
-    private UserService userService;
+    private UarUserService uarUserService;
 
     @ResponseBody
-    @PostMapping("/findOneById")
-    public Map<String, Object> findOneById(HttpServletRequest request){
+    @PostMapping("/findUarBasicUserListByOriginId")
+    public Map<String, Object> findUarBasicUserListByOriginId(HttpServletRequest request){
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        String idStr = request.getParameter("id");
-        Test oneById = testService.findOneById(Integer.parseInt(idStr));
+        String orgIdStr = request.getParameter("orgId");
+        List<UarBasicUser> uarBasicUserListByOriginId = uarUserService.findUarBasicUserListByOriginId(orgIdStr);
 
-        resultMap.put("data", oneById);
-        return resultMap;
-    }
-
-    @ResponseBody
-    @PostMapping("/findOneById2")
-    public Map<String, Object> findOneById2(HttpServletRequest request){
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-
-        String idStr = request.getParameter("id");
-        User oneById = userService.findOneById(Integer.parseInt(idStr));
-
-        resultMap.put("data", oneById);
+        resultMap.put("data", uarBasicUserListByOriginId);
         return resultMap;
     }
 }

@@ -8,37 +8,39 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
 
 /**
- * 第二个数据源
- * Created by ceek on 2018-08-08 21:56.
+ * 第一个数据源
+ * Created by ceek on 2018-08-08 21:50.
  */
 @Configuration
 // 扫描 Mapper 接口并容器管理
-@MapperScan(basePackages = ClusterDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "clusterSqlSessionFactory")
-public class ClusterDataSourceConfig {
-    // 精确到 cluster 目录，以便跟其他数据源隔离
-    static final String PACKAGE = "com.hubpd.bigscreen.mapper.cluster";
-    static final String MAPPER_LOCATION = "classpath:mapper/cluster/*.xml";
+@MapperScan(basePackages = WeishuPdmiDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "weishuPdmiSqlSessionFactory")
+public class WeishuPdmiDataSourceConfig {
+    // 精确到 master 目录，以便跟其他数据源隔离
+    static final String PACKAGE = "com.hubpd.bigscreen.mapper.weishu_pdmi";
+    static final String MAPPER_LOCATION = "classpath:mapper/weishu_pdmi/*.xml";
 
-    @Value("${cluster.datasource.url}")
+    @Value("${weishu_pdmi.datasource.url}")
     private String url;
 
-    @Value("${cluster.datasource.username}")
+    @Value("${weishu_pdmi.datasource.username}")
     private String user;
 
-    @Value("${cluster.datasource.password}")
+    @Value("${weishu_pdmi.datasource.password}")
     private String password;
 
-    @Value("${cluster.datasource.driverClassName}")
+    @Value("${weishu_pdmi.datasource.driverClassName}")
     private String driverClass;
 
-    @Bean(name = "clusterDataSource")
-    public DataSource clusterDataSource() {
+    @Bean(name = "weishuPdmiDataSource")
+    @Primary
+    public DataSource weishuPdmiDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setDriverClassName(driverClass);
         dataSource.setUrl(url);
@@ -47,18 +49,20 @@ public class ClusterDataSourceConfig {
         return dataSource;
     }
 
-    @Bean(name = "clusterTransactionManager")
-    public DataSourceTransactionManager clusterTransactionManager() {
-        return new DataSourceTransactionManager(clusterDataSource());
+    @Bean(name = "weishuPdmiTransactionManager")
+    @Primary
+    public DataSourceTransactionManager weishuPdmiTransactionManager() {
+        return new DataSourceTransactionManager(weishuPdmiDataSource());
     }
 
-    @Bean(name = "clusterSqlSessionFactory")
-    public SqlSessionFactory clusterSqlSessionFactory(@Qualifier("clusterDataSource") DataSource clusterDataSource)
+    @Bean(name = "weishuPdmiSqlSessionFactory")
+    @Primary
+    public SqlSessionFactory weishuPdmiSqlSessionFactory(@Qualifier("weishuPdmiDataSource") DataSource weishuPdmiDataSource)
             throws Exception {
         final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
-        sessionFactory.setDataSource(clusterDataSource);
+        sessionFactory.setDataSource(weishuPdmiDataSource);
         sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver()
-                .getResources(ClusterDataSourceConfig.MAPPER_LOCATION));
+                .getResources(WeishuPdmiDataSourceConfig.MAPPER_LOCATION));
         return sessionFactory.getObject();
     }
 }

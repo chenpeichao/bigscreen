@@ -8,39 +8,37 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
 
 /**
- * 第一个数据源
- * Created by ceek on 2018-08-08 21:50.
+ * 第二个数据源
+ * Created by ceek on 2018-08-08 21:56.
  */
 @Configuration
 // 扫描 Mapper 接口并容器管理
-@MapperScan(basePackages = MasterDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "masterSqlSessionFactory")
-public class MasterDataSourceConfig {
-    // 精确到 master 目录，以便跟其他数据源隔离
-    static final String PACKAGE = "com.hubpd.bigscreen.mapper.master";
-    static final String MAPPER_LOCATION = "classpath:mapper/master/*.xml";
+@MapperScan(basePackages = UarBasicDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "uarBasicSqlSessionFactory")
+public class UarBasicDataSourceConfig {
+    // 精确到 cluster 目录，以便跟其他数据源隔离
+    static final String PACKAGE = "com.hubpd.bigscreen.mapper.uar_basic";
+    static final String MAPPER_LOCATION = "classpath:mapper/uar_basic/*.xml";
 
-    @Value("${master.datasource.url}")
+    @Value("${uar_basic.datasource.url}")
     private String url;
 
-    @Value("${master.datasource.username}")
+    @Value("${uar_basic.datasource.username}")
     private String user;
 
-    @Value("${master.datasource.password}")
+    @Value("${uar_basic.datasource.password}")
     private String password;
 
-    @Value("${master.datasource.driverClassName}")
+    @Value("${uar_basic.datasource.driverClassName}")
     private String driverClass;
 
-    @Bean(name = "masterDataSource")
-    @Primary
-    public DataSource masterDataSource() {
+    @Bean(name = "uarBasicDataSource")
+    public DataSource uarBasicDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setDriverClassName(driverClass);
         dataSource.setUrl(url);
@@ -49,20 +47,18 @@ public class MasterDataSourceConfig {
         return dataSource;
     }
 
-    @Bean(name = "masterTransactionManager")
-    @Primary
-    public DataSourceTransactionManager masterTransactionManager() {
-        return new DataSourceTransactionManager(masterDataSource());
+    @Bean(name = "uarBasicTransactionManager")
+    public DataSourceTransactionManager uarBasicTransactionManager() {
+        return new DataSourceTransactionManager(uarBasicDataSource());
     }
 
-    @Bean(name = "masterSqlSessionFactory")
-    @Primary
-    public SqlSessionFactory masterSqlSessionFactory(@Qualifier("masterDataSource") DataSource masterDataSource)
+    @Bean(name = "uarBasicSqlSessionFactory")
+    public SqlSessionFactory clusterSqlSessionFactory(@Qualifier("uarBasicDataSource") DataSource uarBasicDataSource)
             throws Exception {
         final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
-        sessionFactory.setDataSource(masterDataSource);
+        sessionFactory.setDataSource(uarBasicDataSource);
         sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver()
-                .getResources(MasterDataSourceConfig.MAPPER_LOCATION));
+                .getResources(UarBasicDataSourceConfig.MAPPER_LOCATION));
         return sessionFactory.getObject();
     }
 }

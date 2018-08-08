@@ -1,18 +1,18 @@
 server:
   port: 8088
 
-## master 数据源配置
-master:
+## UAR_BASIC 数据源配置--用于获取指定机构下面的所有用户
+uar_basic:
   datasource:
-    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8
-    username: root
-    password: root_123
+    url: jdbc:mysql://10.10.32.62:3306/UAR_BASIC?useUnicode=true&characterEncoding=utf8
+    username: uardev
+    password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
 
-## cluster 数据源配置
-cluster:
+## weishu 数据源配置--用于获取微信相关数据
+weishu_pdmi:
   datasource:
-    url: jdbc:mysql://10.10.32.62:3306/uar_xyapp_wx?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://10.10.32.62:3306/PDMI?useUnicode=true&characterEncoding=utf8
     username: uardev
     password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
