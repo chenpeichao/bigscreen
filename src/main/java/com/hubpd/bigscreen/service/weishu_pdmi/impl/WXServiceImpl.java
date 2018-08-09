@@ -3,12 +3,19 @@ package com.hubpd.bigscreen.service.weishu_pdmi.impl;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WXService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WeiShuPdmiUserService;
+import com.hubpd.bigscreen.utils.Constants;
+import com.hubpd.bigscreen.utils.DateUtils;
+import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.hubpd.bigscreen.utils.DateUtils.getBeforeDateStrByDateAndPattern;
 
 /**
  * 微信service
@@ -42,8 +49,28 @@ public class WXServiceImpl implements WXService {
 
         //根据用户id列表查询其对应的公众号列表（1:自有，2：关注）
         List<Integer> pubAccountIdListByUserIdList = weiShuPdmiUserService.findPubAccountIdListByUserIdList(uarBasicUserIdListByOrginId, 1);
+        String beginDateStr = "";
+        String endDateStr = "";
+        try {
+            beginDateStr = DateUtils.getBeforeDateStrByDateAndPattern(searchDate, Constants.DATA_BACK_BEGIN_DAY_NUM, "yyyy-MM-dd");
+            endDateStr = DateUtils.getBeforeDateStrByDateAndPattern(searchDate, Constants.DATA_BACK_END_DAY_NUM, "yyyy-MM-dd");
+        } catch (Exception e) {
+            logger.error("请求参数，时间转换错误", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "接口调用失败，时间参数传递错误！！");
+            return resultMap;
+        }
 
-
-        return null;
+        try {
+            List<WXUserAnalyseVO> wxUserAnalyseVOList = weiShuPdmiUserService.findUserAnalyseByPubAccountIdListAndSearchDate(pubAccountIdListByUserIdList, beginDateStr, endDateStr);
+            resultMap.put("code", 1);
+            resultMap.put("data", wxUserAnalyseVOList);
+        } catch (Exception e) {
+            logger.error("查询出错，请稍后再试！", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "查询出错，请稍后再试！");
+        } finally {
+            return resultMap;
+        }
     }
 }

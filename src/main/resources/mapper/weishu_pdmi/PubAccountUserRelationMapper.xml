@@ -27,6 +27,97 @@
       </if>
     </where>
   </select>
+  <!-- 根据用户id列表查询其包含的所有公众号表id列表信息 -->
+  <select id="findUserAnalyseByPubAccountIdListAndSearchDate" resultType="com.hubpd.bigscreen.vo.WXUserAnalyseVO" parameterType="java.util.Map" >
+    SELECT
+    tasd.ref_date1 AS 'dateTime',
+    tpa.wx_id AS 'wxNo',
+    tpa.wx_name AS 'wxName',
+    tasd.likeNum AS 'likeNum',
+    IFNULL(phase1.new_sum, 0) AS 'newFollowNum',
+    IFNULL(phase1.cancel_sum, 0) AS 'cancelFollowNum',
+    IFNULL(phase1.real_increase, 0) AS 'realIncreaseFollowNum',
+    IFNULL(phase1.cumulate_user, 0) AS 'cumulateFollowNum'
+    FROM
+    (
+    SELECT uc.ref_date,us.pub_account_id,us.new_sum,us.cancel_sum,us.real_increase, uc.cumulate_user
+    FROM
+    ( SELECT
+    ref_date,
+    pub_account_id,
+    SUM(new_user) AS 'new_sum',
+    SUM(cancel_user) AS 'cancel_sum',
+    SUM(new_user) - SUM(cancel_user) AS 'real_increase'
+    FROM
+    t_get_user_summary
+    <where>
+        <if test="beginDateStr !=null and beginDateStr != ''">
+            AND ref_date >= #{beginDateStr}
+        </if>
+        <if test="endDateStr !=null and endDateStr != ''">
+            AND ref_date <![CDATA[<=]]> #{endDateStr}
+        </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+    GROUP BY ref_date,pub_account_id
+    ORDER BY ref_date,pub_account_id
+    ) us
+    RIGHT JOIN (
+    SELECT
+    ref_date,
+    pub_account_id,
+    cumulate_user
+    FROM
+    t_get_user_cumulate
+    <where>
+        <if test="beginDateStr !=null and beginDateStr != ''">
+            AND ref_date >= #{beginDateStr}
+        </if>
+        <if test="endDateStr !=null and endDateStr != ''">
+            AND ref_date <![CDATA[<=]]> #{endDateStr}
+        </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+    ) uc ON us.pub_account_id = uc.pub_account_id AND us.ref_date = uc.ref_date
+    ) phase1
+    RIGHT JOIN (
+    SELECT
+    tas.pub_account_id AS 'pub_account_id1',
+    tas.ref_date AS 'ref_date1',
+    SUM(tas.total_read_num) AS 'readNum',
+    SUM(tas.total_like_num) AS 'likeNum'
+    FROM t_article_stat_day tas
+    <where>
+      <if test="beginDateStr !=null and beginDateStr != ''">
+        AND ref_date >= #{beginDateStr}
+      </if>
+      <if test="endDateStr !=null and endDateStr != ''">
+        AND ref_date <![CDATA[<=]]> #{endDateStr}
+      </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND tas.pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+    GROUP BY  tas.pub_account_id, tas.ref_date ORDER BY tas.pub_account_id, tas.ref_date DESC
+    ) tasd ON tasd.pub_account_id1 = phase1.pub_account_id AND tasd.ref_date1 = phase1.ref_date LEFT JOIN t_pub_account tpa ON tasd.pub_account_id1 = tpa.id
+    ORDER BY pub_account_id, real_increase DESC;
+  </select>
 
 
 

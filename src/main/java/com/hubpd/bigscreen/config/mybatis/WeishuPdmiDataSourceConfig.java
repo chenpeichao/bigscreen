@@ -1,4 +1,4 @@
-package com.hubpd.bigscreen.config;
+package com.hubpd.bigscreen.config.mybatis;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;

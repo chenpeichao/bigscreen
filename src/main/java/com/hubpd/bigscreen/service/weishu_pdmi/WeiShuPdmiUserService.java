@@ -1,5 +1,7 @@
 package com.hubpd.bigscreen.service.weishu_pdmi;
 
+import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
+
 import java.util.List;
 
 /**
@@ -14,4 +16,13 @@ public interface WeiShuPdmiUserService {
      * @return
      */
     public List<Integer> findPubAccountIdListByUserIdList(List<String> userIdList, Integer userFollow);
+
+    /**
+     * 根据公众号id列表查询微信运营列表信息
+     * @param pubAccountIdListByUserIdList        公众号id列表
+     * @param beginDateStr                          开始时间
+     * @param endDateStr                            结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findUserAnalyseByPubAccountIdListAndSearchDate(List<Integer> pubAccountIdListByUserIdList, String beginDateStr, String endDateStr);
 }

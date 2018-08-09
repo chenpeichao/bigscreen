@@ -3,6 +3,7 @@ package com.hubpd.bigscreen.service.weishu_pdmi.impl;
 import com.hubpd.bigscreen.mapper.weishu_pdmi.PubAccountUserRelationMapper;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WeiShuPdmiUserService;
+import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,5 +37,20 @@ public class WeiShuPdmiUserServiceImpl implements WeiShuPdmiUserService {
         params.put("userIdList", userIdList);
         params.put("userFollow", userFollow);
         return pubAccountUserRelationMapper.findPubAccountIdListByUserIdList(params);
+    }
+
+    /**
+     * 根据公众号id列表查询微信运营列表信息
+     * @param pubAccountIdListByUserIdList        公众号id列表
+     * @param beginDateStr                          开始时间
+     * @param endDateStr                            结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findUserAnalyseByPubAccountIdListAndSearchDate(List<Integer> pubAccountIdListByUserIdList, String beginDateStr, String endDateStr) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("pubAccountIdListByUserIdList", pubAccountIdListByUserIdList);
+        params.put("beginDateStr", beginDateStr);
+        params.put("endDateStr", endDateStr);
+        return pubAccountUserRelationMapper.findUserAnalyseByPubAccountIdListAndSearchDate(params);
     }
 }

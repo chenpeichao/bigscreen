@@ -1,6 +1,7 @@
 package com.hubpd.bigscreen.mapper.weishu_pdmi;
 
 import com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountUserRelation;
+import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
 
 import java.util.List;
 import java.util.Map;
@@ -16,4 +17,11 @@ public interface PubAccountUserRelationMapper {
      * @return
      */
     public List<Integer> findPubAccountIdListByUserIdList(Map<String, Object> params);
+
+    /**
+     * 根据公众号id列表查询微信运营列表信息
+     * @param params            公众号id列表,开始时间,结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findUserAnalyseByPubAccountIdListAndSearchDate(Map<String, Object> params);
 }

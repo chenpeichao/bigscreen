@@ -12,7 +12,7 @@ master:
 ## cluster 数据源配置
 cluster:
   datasource:
-    url: jdbc:mysql://10.10.32.62:3306/uar_xyapp_wx?useUnicode=true&characterEncoding=utf8
-    username: uardev
-    password: uardev2017
-    driverClassName: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://10.101.67.9:3306/pdmi?useUnicode=true&characterEncoding=utf8
+#    username: lvsijia
+#    password: lvsijia
+#    driverClassName: com.mysql.jdbc.Driver
