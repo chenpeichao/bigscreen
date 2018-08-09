@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.weishu_pdmi.PubAccountUserRelationMapper" >
+  <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountUserRelation" >
+    <result column="pub_account_id" property="pubAccountId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="user_follow" property="userFollow" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="expired_time" property="expiredTime" jdbcType="TIMESTAMP" />
+    <result column="org_id" property="orgId" jdbcType="VARCHAR" />
+  </resultMap>
+  <!-- 根据用户id列表查询其包含的所有公众号表id列表信息 -->
+  <select id="findPubAccountIdListByUserIdList" resultType="java.lang.Integer" parameterType="java.util.Map" >
+    select
+      DISTINCT pub_account_id
+    from t_pub_account_user_relation tpaur
+    <where>
+      <if test="userFollow !=null and userFollow > 0">
+        tpaur.user_follow=#{userFollow}
+      </if>
+      <if test="userIdList!=null and userIdList.size() > 0">
+        AND tpaur.user_id in
+        <foreach collection="userIdList" item="userId"
+                 index="index" open="(" close=")" separator=",">
+          #{userId}
+        </foreach>
+      </if>
+    </where>
+  </select>
+
+
+
+
+
+  <insert id="insert" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountUserRelation" >
+    insert into t_pub_account_user_relation (pub_account_id, user_id, user_follow,
+      create_time, expired_time, org_id
+      )
+    values (#{pubAccountId,jdbcType=INTEGER}, #{userId,jdbcType=VARCHAR}, #{userFollow,jdbcType=INTEGER},
+      #{createTime,jdbcType=TIMESTAMP}, #{expiredTime,jdbcType=TIMESTAMP}, #{orgId,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountUserRelation" >
+    insert into t_pub_account_user_relation
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="pubAccountId != null" >
+        pub_account_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="userFollow != null" >
+        user_follow,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="expiredTime != null" >
+        expired_time,
+      </if>
+      <if test="orgId != null" >
+        org_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="pubAccountId != null" >
+        #{pubAccountId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="userFollow != null" >
+        #{userFollow,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="expiredTime != null" >
+        #{expiredTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="orgId != null" >
+        #{orgId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

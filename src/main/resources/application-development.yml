@@ -1,5 +1,10 @@
 server:
-  port: 8088
+  port: 8889
+
+#mybatis打印日志，注意是mapper的包
+logging:
+  level:
+     com.hubpd.bigscreen.mapper: debug
 
 ## UAR_BASIC 数据源配置--用于获取指定机构下面的所有用户
 uar_basic:
