@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.weishu_pdmi.PubAccountMapper" >
+  <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccount" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+    <result column="wx_id" property="wxId" jdbcType="VARCHAR" />
+    <result column="biz" property="biz" jdbcType="VARCHAR" />
+    <result column="wx_name" property="wxName" jdbcType="VARCHAR" />
+    <result column="openid" property="openid" jdbcType="VARCHAR" />
+    <result column="wx_type" property="wxType" jdbcType="INTEGER" />
+    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+    <result column="wx_cert" property="wxCert" jdbcType="VARCHAR" />
+    <result column="wx_country" property="wxCountry" jdbcType="VARCHAR" />
+    <result column="wx_province" property="wxProvince" jdbcType="VARCHAR" />
+    <result column="wx_city" property="wxCity" jdbcType="VARCHAR" />
+    <result column="qrcode_url" property="qrcodeUrl" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="BIT" />
+    <result column="access_token" property="accessToken" jdbcType="VARCHAR" />
+    <result column="app_id" property="appId" jdbcType="VARCHAR" />
+    <result column="platform_app_id" property="platformAppId" jdbcType="VARCHAR" />
+    <result column="origin_id" property="originId" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs" extends="BaseResultMap" >
+    <result column="intro" property="intro" jdbcType="LONGVARCHAR" />
+    <result column="certinfo" property="certinfo" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, create_date, modify_date, wx_id, biz, wx_name, openid, wx_type, avatar, wx_cert, 
+    wx_country, wx_province, wx_city, qrcode_url, is_enabled, access_token, app_id, platform_app_id, 
+    origin_id
+  </sql>
+  <sql id="Blob_Column_List" >
+    intro, certinfo
+  </sql>
+  <select id="selectByIdNoBlobColumn" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_pub_account
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_pub_account
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_pub_account
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs" >
+    insert into t_pub_account (id, create_date, modify_date, 
+      wx_id, biz, wx_name, 
+      openid, wx_type, avatar, 
+      wx_cert, wx_country, wx_province, 
+      wx_city, qrcode_url, is_enabled, 
+      access_token, app_id, platform_app_id, 
+      origin_id, intro, certinfo
+      )
+    values (#{id,jdbcType=INTEGER}, #{createDate,jdbcType=TIMESTAMP}, #{modifyDate,jdbcType=TIMESTAMP}, 
+      #{wxId,jdbcType=VARCHAR}, #{biz,jdbcType=VARCHAR}, #{wxName,jdbcType=VARCHAR}, 
+      #{openid,jdbcType=VARCHAR}, #{wxType,jdbcType=INTEGER}, #{avatar,jdbcType=VARCHAR}, 
+      #{wxCert,jdbcType=VARCHAR}, #{wxCountry,jdbcType=VARCHAR}, #{wxProvince,jdbcType=VARCHAR}, 
+      #{wxCity,jdbcType=VARCHAR}, #{qrcodeUrl,jdbcType=VARCHAR}, #{isEnabled,jdbcType=BIT}, 
+      #{accessToken,jdbcType=VARCHAR}, #{appId,jdbcType=VARCHAR}, #{platformAppId,jdbcType=VARCHAR}, 
+      #{originId,jdbcType=VARCHAR}, #{intro,jdbcType=LONGVARCHAR}, #{certinfo,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs" >
+    insert into t_pub_account
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="modifyDate != null" >
+        modify_date,
+      </if>
+      <if test="wxId != null" >
+        wx_id,
+      </if>
+      <if test="biz != null" >
+        biz,
+      </if>
+      <if test="wxName != null" >
+        wx_name,
+      </if>
+      <if test="openid != null" >
+        openid,
+      </if>
+      <if test="wxType != null" >
+        wx_type,
+      </if>
+      <if test="avatar != null" >
+        avatar,
+      </if>
+      <if test="wxCert != null" >
+        wx_cert,
+      </if>
+      <if test="wxCountry != null" >
+        wx_country,
+      </if>
+      <if test="wxProvince != null" >
+        wx_province,
+      </if>
+      <if test="wxCity != null" >
+        wx_city,
+      </if>
+      <if test="qrcodeUrl != null" >
+        qrcode_url,
+      </if>
+      <if test="isEnabled != null" >
+        is_enabled,
+      </if>
+      <if test="accessToken != null" >
+        access_token,
+      </if>
+      <if test="appId != null" >
+        app_id,
+      </if>
+      <if test="platformAppId != null" >
+        platform_app_id,
+      </if>
+      <if test="originId != null" >
+        origin_id,
+      </if>
+      <if test="intro != null" >
+        intro,
+      </if>
+      <if test="certinfo != null" >
+        certinfo,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyDate != null" >
+        #{modifyDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="wxId != null" >
+        #{wxId,jdbcType=VARCHAR},
+      </if>
+      <if test="biz != null" >
+        #{biz,jdbcType=VARCHAR},
+      </if>
+      <if test="wxName != null" >
+        #{wxName,jdbcType=VARCHAR},
+      </if>
+      <if test="openid != null" >
+        #{openid,jdbcType=VARCHAR},
+      </if>
+      <if test="wxType != null" >
+        #{wxType,jdbcType=INTEGER},
+      </if>
+      <if test="avatar != null" >
+        #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="wxCert != null" >
+        #{wxCert,jdbcType=VARCHAR},
+      </if>
+      <if test="wxCountry != null" >
+        #{wxCountry,jdbcType=VARCHAR},
+      </if>
+      <if test="wxProvince != null" >
+        #{wxProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="wxCity != null" >
+        #{wxCity,jdbcType=VARCHAR},
+      </if>
+      <if test="qrcodeUrl != null" >
+        #{qrcodeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="isEnabled != null" >
+        #{isEnabled,jdbcType=BIT},
+      </if>
+      <if test="accessToken != null" >
+        #{accessToken,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="platformAppId != null" >
+        #{platformAppId,jdbcType=VARCHAR},
+      </if>
+      <if test="originId != null" >
+        #{originId,jdbcType=VARCHAR},
+      </if>
+      <if test="intro != null" >
+        #{intro,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="certinfo != null" >
+        #{certinfo,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs" >
+    update t_pub_account
+    <set >
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyDate != null" >
+        modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="wxId != null" >
+        wx_id = #{wxId,jdbcType=VARCHAR},
+      </if>
+      <if test="biz != null" >
+        biz = #{biz,jdbcType=VARCHAR},
+      </if>
+      <if test="wxName != null" >
+        wx_name = #{wxName,jdbcType=VARCHAR},
+      </if>
+      <if test="openid != null" >
+        openid = #{openid,jdbcType=VARCHAR},
+      </if>
+      <if test="wxType != null" >
+        wx_type = #{wxType,jdbcType=INTEGER},
+      </if>
+      <if test="avatar != null" >
+        avatar = #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="wxCert != null" >
+        wx_cert = #{wxCert,jdbcType=VARCHAR},
+      </if>
+      <if test="wxCountry != null" >
+        wx_country = #{wxCountry,jdbcType=VARCHAR},
+      </if>
+      <if test="wxProvince != null" >
+        wx_province = #{wxProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="wxCity != null" >
+        wx_city = #{wxCity,jdbcType=VARCHAR},
+      </if>
+      <if test="qrcodeUrl != null" >
+        qrcode_url = #{qrcodeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="isEnabled != null" >
+        is_enabled = #{isEnabled,jdbcType=BIT},
+      </if>
+      <if test="accessToken != null" >
+        access_token = #{accessToken,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        app_id = #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="platformAppId != null" >
+        platform_app_id = #{platformAppId,jdbcType=VARCHAR},
+      </if>
+      <if test="originId != null" >
+        origin_id = #{originId,jdbcType=VARCHAR},
+      </if>
+      <if test="intro != null" >
+        intro = #{intro,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="certinfo != null" >
+        certinfo = #{certinfo,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs" >
+    update t_pub_account
+    set create_date = #{createDate,jdbcType=TIMESTAMP},
+      modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      wx_id = #{wxId,jdbcType=VARCHAR},
+      biz = #{biz,jdbcType=VARCHAR},
+      wx_name = #{wxName,jdbcType=VARCHAR},
+      openid = #{openid,jdbcType=VARCHAR},
+      wx_type = #{wxType,jdbcType=INTEGER},
+      avatar = #{avatar,jdbcType=VARCHAR},
+      wx_cert = #{wxCert,jdbcType=VARCHAR},
+      wx_country = #{wxCountry,jdbcType=VARCHAR},
+      wx_province = #{wxProvince,jdbcType=VARCHAR},
+      wx_city = #{wxCity,jdbcType=VARCHAR},
+      qrcode_url = #{qrcodeUrl,jdbcType=VARCHAR},
+      is_enabled = #{isEnabled,jdbcType=BIT},
+      access_token = #{accessToken,jdbcType=VARCHAR},
+      app_id = #{appId,jdbcType=VARCHAR},
+      platform_app_id = #{platformAppId,jdbcType=VARCHAR},
+      origin_id = #{originId,jdbcType=VARCHAR},
+      intro = #{intro,jdbcType=LONGVARCHAR},
+      certinfo = #{certinfo,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubAccount" >
+    update t_pub_account
+    set create_date = #{createDate,jdbcType=TIMESTAMP},
+      modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      wx_id = #{wxId,jdbcType=VARCHAR},
+      biz = #{biz,jdbcType=VARCHAR},
+      wx_name = #{wxName,jdbcType=VARCHAR},
+      openid = #{openid,jdbcType=VARCHAR},
+      wx_type = #{wxType,jdbcType=INTEGER},
+      avatar = #{avatar,jdbcType=VARCHAR},
+      wx_cert = #{wxCert,jdbcType=VARCHAR},
+      wx_country = #{wxCountry,jdbcType=VARCHAR},
+      wx_province = #{wxProvince,jdbcType=VARCHAR},
+      wx_city = #{wxCity,jdbcType=VARCHAR},
+      qrcode_url = #{qrcodeUrl,jdbcType=VARCHAR},
+      is_enabled = #{isEnabled,jdbcType=BIT},
+      access_token = #{accessToken,jdbcType=VARCHAR},
+      app_id = #{appId,jdbcType=VARCHAR},
+      platform_app_id = #{platformAppId,jdbcType=VARCHAR},
+      origin_id = #{originId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -6,6 +6,7 @@ import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WXService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -51,6 +52,10 @@ public class WXController {
         } else {
             try {
                 searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
+                //当查询时间大于当天系统时间，默认查询今天
+                if(searchDate.getTime() > System.currentTimeMillis()) {
+                    searchDate =  new Date();
+                }
             } catch (ParseException e) {
                 logger.error("getWXUserAnalyse微信运营接口日期参数格式错误", e);
                 resultMap.put("code", 0);

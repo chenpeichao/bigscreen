@@ -8,11 +8,11 @@ public class WXUserAnalyseVO {
     private String wxNo;                        //微信公众号
     private String wxName;                        //微信名称
     private String dateTime;                    //数据对应日期(为请求参数中时间的前七天中某一天，格式为yyyy-MM-dd)
-    private Integer newFollowNum;              //新增关注人数
-    private Integer cumulateFollowNum;         //累计关注人数
-    private Integer cancelFollowNum;            //取消关注人数
-    private Integer realIncreaseFollowNum;      //净增关注人数
-    private Long likeNum;                       //点赞总数
+    private Integer newFollowNum = 0;              //新增关注人数
+    private Integer cumulateFollowNum = 0;         //累计关注人数
+    private Integer cancelFollowNum = 0;            //取消关注人数
+    private Integer realIncreaseFollowNum = 0;      //净增关注人数
+    private Long likeNum = 0l;                       //点赞总数
 
     public String getWxNo() {
         return wxNo;

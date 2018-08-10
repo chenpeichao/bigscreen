@@ -119,6 +119,100 @@
     ORDER BY pub_account_id, real_increase DESC;
   </select>
 
+  <!-- 根据公众号id列表查询微信用户统计信息 -->
+  <select id="findUserStatisticsByPubAccountIdListAndSearchDate" resultType="com.hubpd.bigscreen.vo.WXUserAnalyseVO" parameterType="java.util.Map" >
+    SELECT
+    ref_date AS 'dateTime',
+    tpa.wx_id AS 'wxNo',
+    tpa.wx_name AS 'wxName',
+    IFNULL(phase1.new_sum, 0) AS 'newFollowNum',
+    IFNULL(phase1.cancel_sum, 0) AS 'cancelFollowNum',
+    IFNULL(phase1.real_increase, 0) AS 'realIncreaseFollowNum',
+    IFNULL(phase1.cumulate_user, 0) AS 'cumulateFollowNum'
+    FROM
+    (
+    SELECT uc.ref_date,us.pub_account_id,us.new_sum,us.cancel_sum,us.real_increase, uc.cumulate_user
+    FROM
+    ( SELECT
+    ref_date,
+    pub_account_id,
+    IFNULL(SUM(new_user),0) AS 'new_sum',
+    IFNULL(SUM(cancel_user),0) AS 'cancel_sum',
+    IFNULL(SUM(new_user) - SUM(cancel_user),0) AS 'real_increase'
+    FROM
+    t_get_user_summary
+    <where>
+      <if test="beginDateStr !=null and beginDateStr != ''">
+        AND ref_date >= #{beginDateStr}
+      </if>
+      <if test="endDateStr !=null and endDateStr != ''">
+        AND ref_date <![CDATA[<=]]> #{endDateStr}
+      </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+    GROUP BY ref_date,pub_account_id
+    ORDER BY ref_date,pub_account_id
+    ) us
+    RIGHT JOIN (
+    SELECT
+    ref_date,
+    pub_account_id,
+    cumulate_user
+    FROM
+    t_get_user_cumulate
+    <where>
+      <if test="beginDateStr !=null and beginDateStr != ''">
+        AND ref_date >= #{beginDateStr}
+      </if>
+      <if test="endDateStr !=null and endDateStr != ''">
+        AND ref_date <![CDATA[<=]]> #{endDateStr}
+      </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+    ) uc ON us.pub_account_id = uc.pub_account_id AND us.ref_date = uc.ref_date
+    ) phase1 LEFT JOIN t_pub_account tpa ON phase1.pub_account_id = tpa.id
+
+    ORDER BY pub_account_id, ref_date DESC;
+  </select>
+
+  <!-- 根据公众号id列表查询微信用户点赞信息 -->
+  <select id="findPubAccountLikeNumByPubAccountIdListAndSearchDate" resultType="com.hubpd.bigscreen.vo.WXUserAnalyseVO" parameterType="java.util.Map" >
+    SELECT
+      tas.ref_date AS 'dateTime',
+      tpa.wx_id AS 'wxNo',
+      tpa.wx_name AS 'wxName',
+    IFNULL(SUM(tas.total_like_num),0) AS 'likeNum'
+    FROM t_article_stat_day tas LEFT JOIN t_pub_account tpa ON tas.pub_account_id = tpa.id
+    <where>
+      <if test="beginDateStr !=null and beginDateStr != ''">
+        AND tas.ref_date >= #{beginDateStr}
+      </if>
+      <if test="endDateStr !=null and endDateStr != ''">
+        AND tas.ref_date <![CDATA[<=]]> #{endDateStr}
+      </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND tas.pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+    GROUP BY  tas.pub_account_id, tas.ref_date ORDER BY tas.pub_account_id, tas.ref_date DESC;
+  </select>
+
 
 
 

@@ -40,7 +40,7 @@ public class WeiShuPdmiUserServiceImpl implements WeiShuPdmiUserService {
     }
 
     /**
-     * 根据公众号id列表查询微信运营列表信息
+     * 根据公众号id列表查询微信运营列表信息（包括用户统计和点赞数）
      * @param pubAccountIdListByUserIdList        公众号id列表
      * @param beginDateStr                          开始时间
      * @param endDateStr                            结束时间
@@ -53,4 +53,35 @@ public class WeiShuPdmiUserServiceImpl implements WeiShuPdmiUserService {
         params.put("endDateStr", endDateStr);
         return pubAccountUserRelationMapper.findUserAnalyseByPubAccountIdListAndSearchDate(params);
     }
+
+    /**
+     * 根据公众号id列表查询微信用户统计信息
+     * @param pubAccountIdListByUserIdList        公众号id列表
+     * @param beginDateStr                          开始时间
+     * @param endDateStr                            结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findUserStatisticsByPubAccountIdListAndSearchDate(List<Integer> pubAccountIdListByUserIdList, String beginDateStr, String endDateStr) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("pubAccountIdListByUserIdList", pubAccountIdListByUserIdList);
+        params.put("beginDateStr", beginDateStr);
+        params.put("endDateStr", endDateStr);
+        return pubAccountUserRelationMapper.findUserStatisticsByPubAccountIdListAndSearchDate(params);
+    }
+
+    /**
+     * 根据公众号id列表查询微信公众号点赞信息
+     * @param pubAccountIdListByUserIdList        公众号id列表
+     * @param beginDateStr                          开始时间
+     * @param endDateStr                            结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findPubAccountLikeNumByPubAccountIdListAndSearchDate(List<Integer> pubAccountIdListByUserIdList, String beginDateStr, String endDateStr) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("pubAccountIdListByUserIdList", pubAccountIdListByUserIdList);
+        params.put("beginDateStr", beginDateStr);
+        params.put("endDateStr", endDateStr);
+        return pubAccountUserRelationMapper.findPubAccountLikeNumByPubAccountIdListAndSearchDate(params);
+    }
+
 }

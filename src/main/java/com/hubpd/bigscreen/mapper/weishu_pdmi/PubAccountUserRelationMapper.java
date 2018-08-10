@@ -24,4 +24,19 @@ public interface PubAccountUserRelationMapper {
      * @return
      */
     public List<WXUserAnalyseVO> findUserAnalyseByPubAccountIdListAndSearchDate(Map<String, Object> params);
+
+    /**
+     * 根据公众号id列表查询微信用户统计信息
+     * @param params            公众号id列表,开始时间,结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findUserStatisticsByPubAccountIdListAndSearchDate(Map<String, Object> params);
+
+    /**
+     * 根据公众号id列表查询微信公众号点赞信息
+     * @param params            公众号id列表,开始时间,结束时间
+     * @return
+     */
+    public List<WXUserAnalyseVO> findPubAccountLikeNumByPubAccountIdListAndSearchDate(Map<String, Object> params);
+
 }

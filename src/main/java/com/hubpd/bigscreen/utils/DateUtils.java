@@ -13,17 +13,30 @@ public class DateUtils {
 
     /**
      * 获取前/后多少天的时间字符串
-     * @param sourceDate        初始时间
-     * @param endGap            前后多少
-     * @param datePattern       时间字符串返回模式(yyyy-MM-dd)
+     *
+     * @param sourceDate  初始时间
+     * @param endGap      前后多少
+     * @param datePattern 时间字符串返回模式(yyyy-MM-dd)
      * @return
      */
-    public static String getBeforeDateStrByDateAndPattern(Date sourceDate, Integer endGap, String datePattern) throws Exception{
+    public static String getBeforeDateStrByDateAndPattern(Date sourceDate, Integer endGap, String datePattern) throws Exception {
         DateFormat dateFormat = new SimpleDateFormat(datePattern);
         Calendar c = Calendar.getInstance();
         c.setTime((Date) sourceDate.clone());
         c.add(Calendar.DATE, endGap);
         String endtimeStr = dateFormat.format(c.getTime());
         return endtimeStr;
+    }
+
+    /**
+     * 获取指定日期指定格式的字符串日期
+     *
+     * @param date    日期
+     * @param pattern 指定格式
+     * @return
+     */
+    public static String getDateStrByDate(Date date, String pattern) {
+        String formatDateStr = new SimpleDateFormat(pattern).format(date);
+        return formatDateStr;
     }
 }
