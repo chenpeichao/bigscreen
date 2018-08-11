@@ -1,8 +1,11 @@
 package com.hubpd.bigscreen.service.weishu_pdmi.impl;
 
+import com.hubpd.bigscreen.mapper.weishu_pdmi.ArticleMapper;
+import com.hubpd.bigscreen.mapper.weishu_pdmi.ArticleStatMapper;
 import com.hubpd.bigscreen.mapper.weishu_pdmi.PubAccountUserRelationMapper;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WeiShuPdmiUserService;
+import com.hubpd.bigscreen.vo.WXArticleAnalyseVO;
 import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ public class WeiShuPdmiUserServiceImpl implements WeiShuPdmiUserService {
     /** 微信数据库中用户和公众号关联关系 */
     @Autowired
     private PubAccountUserRelationMapper pubAccountUserRelationMapper;
+    @Autowired
+    private ArticleStatMapper articleStatMapper;
 
     /**
      * 根据用户id列表查询其授权的公众号id列表
@@ -82,6 +87,21 @@ public class WeiShuPdmiUserServiceImpl implements WeiShuPdmiUserService {
         params.put("beginDateStr", beginDateStr);
         params.put("endDateStr", endDateStr);
         return pubAccountUserRelationMapper.findPubAccountLikeNumByPubAccountIdListAndSearchDate(params);
+    }
+
+    /**
+     *  根据公众号id列表，查询文章信息以及指定日期段的阅读数和点赞数
+     * @param pubAccountIdListByUserIdList        公众号id列表
+     * @param beginDateStr                          开始时间
+     * @param endDateStr                            结束时间
+     * @return
+     */
+    public List<WXArticleAnalyseVO> findgetWXArticleStatByAccountIdListAndSearchDate(List<Integer> pubAccountIdListByUserIdList, String beginDateStr, String endDateStr) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("pubAccountIdListByUserIdList", pubAccountIdListByUserIdList);
+        params.put("beginDateStr", beginDateStr);
+        params.put("endDateStr", endDateStr);
+        return articleStatMapper.findgetWXArticleStatByAccountIdListAndSearchDate(params);
     }
 
 }

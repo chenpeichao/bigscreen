@@ -33,6 +33,11 @@ public class WXController {
     @Autowired
     private WXService wxService;
 
+    /**
+     * 微信运营接口：微信公号、日期、新关注人数、取消关注人数、净增关注人数、累积关注人数、点赞总数； 数据是前一天往前7天的数据，每天调取1次，每个客户按最多10个公众号预估
+     * @param request
+     * @return
+     */
     @ResponseBody
     @PostMapping("/getWXUserAnalyse")
     public Map<String, Object> getWXUserAnalyse(HttpServletRequest request){
@@ -68,6 +73,53 @@ public class WXController {
             return wxService.getWXUserAnalyse(orginIdStr, searchDate);
         } catch (Exception e) {
             logger.error("getWXUserAnalyse微信运营接口调用失败-发生未知错误", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "接口调用失败，请重试！！");
+            return resultMap;
+        }
+    }
+
+
+    /**
+     * 内容ID、文章标题、文章链接（固定连接）、阅读数、点赞数
+     * @param request
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/getWXArticleList")
+    public Map<String, Object> getWXArticleList(HttpServletRequest request){
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String orginIdStr = request.getParameter("orginId");
+        String searchDateStr = request.getParameter("searchDate");
+
+        Date searchDate = null;
+        if(StringUtils.isBlank(orginIdStr)) {
+            resultMap.put("code", 0);
+            resultMap.put("message", "机构id未传递");
+            return resultMap;
+        }
+        if(StringUtils.isBlank(searchDateStr)) {
+            searchDate = new Date();
+        } else {
+            try {
+                searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
+                //当查询时间大于当天系统时间，默认查询今天
+                if(searchDate.getTime() > System.currentTimeMillis()) {
+                    searchDate =  new Date();
+                }
+            } catch (ParseException e) {
+                logger.error("getWXUserAnalyse微信内容接口日期参数格式错误", e);
+                resultMap.put("code", 0);
+                resultMap.put("message", "日期格式错误！【yyyy-MM-dd】");
+                return resultMap;
+            }
+        }
+
+        try {
+            return wxService.getWXArticleList(orginIdStr, searchDate);
+        } catch (Exception e) {
+            logger.error("getWXUserAnalyse微信内容接口调用失败-发生未知错误", e);
             resultMap.put("code", 0);
             resultMap.put("message", "接口调用失败，请重试！！");
             return resultMap;

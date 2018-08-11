@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.weishu_pdmi.ArticleMapper" >
+  <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.weishu_pdmi.Article" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+    <result column="pub_account_id" property="pubAccountId" jdbcType="INTEGER" />
+    <result column="biz" property="biz" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="author" property="author" jdbcType="VARCHAR" />
+    <result column="msgid" property="msgid" jdbcType="VARCHAR" />
+    <result column="msgindex" property="msgindex" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleWithBLOBs" extends="BaseResultMap" >
+    <result column="abstract" property="abstract" jdbcType="LONGVARCHAR" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    <result column="ext_data" property="extData" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, create_date, modify_date, pub_account_id, biz, url, publish_time, title, author, 
+    msgid, msgindex
+  </sql>
+  <sql id="Blob_Column_List" >
+    abstract, content, ext_data
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_article
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_article
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleWithBLOBs" >
+    insert into t_article (id, create_date, modify_date, 
+      pub_account_id, biz, url, 
+      publish_time, title, author, 
+      msgid, msgindex, abstract, 
+      content, ext_data)
+    values (#{id,jdbcType=BIGINT}, #{createDate,jdbcType=TIMESTAMP}, #{modifyDate,jdbcType=TIMESTAMP}, 
+      #{pubAccountId,jdbcType=INTEGER}, #{biz,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, 
+      #{publishTime,jdbcType=TIMESTAMP}, #{title,jdbcType=VARCHAR}, #{author,jdbcType=VARCHAR}, 
+      #{msgid,jdbcType=VARCHAR}, #{msgindex,jdbcType=INTEGER}, #{abstract,jdbcType=LONGVARCHAR}, 
+      #{content,jdbcType=LONGVARCHAR}, #{extData,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleWithBLOBs" >
+    insert into t_article
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="modifyDate != null" >
+        modify_date,
+      </if>
+      <if test="pubAccountId != null" >
+        pub_account_id,
+      </if>
+      <if test="biz != null" >
+        biz,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="publishTime != null" >
+        publish_time,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="author != null" >
+        author,
+      </if>
+      <if test="msgid != null" >
+        msgid,
+      </if>
+      <if test="msgindex != null" >
+        msgindex,
+      </if>
+      <if test="abstract != null" >
+        abstract,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="extData != null" >
+        ext_data,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyDate != null" >
+        #{modifyDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pubAccountId != null" >
+        #{pubAccountId,jdbcType=INTEGER},
+      </if>
+      <if test="biz != null" >
+        #{biz,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="publishTime != null" >
+        #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null" >
+        #{author,jdbcType=VARCHAR},
+      </if>
+      <if test="msgid != null" >
+        #{msgid,jdbcType=VARCHAR},
+      </if>
+      <if test="msgindex != null" >
+        #{msgindex,jdbcType=INTEGER},
+      </if>
+      <if test="abstract != null" >
+        #{abstract,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="extData != null" >
+        #{extData,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleWithBLOBs" >
+    update t_article
+    <set >
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyDate != null" >
+        modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pubAccountId != null" >
+        pub_account_id = #{pubAccountId,jdbcType=INTEGER},
+      </if>
+      <if test="biz != null" >
+        biz = #{biz,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="publishTime != null" >
+        publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null" >
+        author = #{author,jdbcType=VARCHAR},
+      </if>
+      <if test="msgid != null" >
+        msgid = #{msgid,jdbcType=VARCHAR},
+      </if>
+      <if test="msgindex != null" >
+        msgindex = #{msgindex,jdbcType=INTEGER},
+      </if>
+      <if test="abstract != null" >
+        abstract = #{abstract,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="extData != null" >
+        ext_data = #{extData,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleWithBLOBs" >
+    update t_article
+    set create_date = #{createDate,jdbcType=TIMESTAMP},
+      modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      pub_account_id = #{pubAccountId,jdbcType=INTEGER},
+      biz = #{biz,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      title = #{title,jdbcType=VARCHAR},
+      author = #{author,jdbcType=VARCHAR},
+      msgid = #{msgid,jdbcType=VARCHAR},
+      msgindex = #{msgindex,jdbcType=INTEGER},
+      abstract = #{abstract,jdbcType=LONGVARCHAR},
+      content = #{content,jdbcType=LONGVARCHAR},
+      ext_data = #{extData,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.Article" >
+    update t_article
+    set create_date = #{createDate,jdbcType=TIMESTAMP},
+      modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      pub_account_id = #{pubAccountId,jdbcType=INTEGER},
+      biz = #{biz,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      title = #{title,jdbcType=VARCHAR},
+      author = #{author,jdbcType=VARCHAR},
+      msgid = #{msgid,jdbcType=VARCHAR},
+      msgindex = #{msgindex,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

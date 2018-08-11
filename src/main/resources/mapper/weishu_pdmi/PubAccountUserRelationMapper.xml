@@ -116,7 +116,7 @@
     </where>
     GROUP BY  tas.pub_account_id, tas.ref_date ORDER BY tas.pub_account_id, tas.ref_date DESC
     ) tasd ON tasd.pub_account_id1 = phase1.pub_account_id AND tasd.ref_date1 = phase1.ref_date LEFT JOIN t_pub_account tpa ON tasd.pub_account_id1 = tpa.id
-    ORDER BY pub_account_id, real_increase DESC;
+    ORDER BY pub_account_id, real_increase DESC
   </select>
 
   <!-- 根据公众号id列表查询微信用户统计信息 -->
@@ -184,7 +184,7 @@
     ) uc ON us.pub_account_id = uc.pub_account_id AND us.ref_date = uc.ref_date
     ) phase1 LEFT JOIN t_pub_account tpa ON phase1.pub_account_id = tpa.id
 
-    ORDER BY pub_account_id, ref_date DESC;
+    ORDER BY pub_account_id, ref_date DESC
   </select>
 
   <!-- 根据公众号id列表查询微信用户点赞信息 -->
@@ -210,7 +210,7 @@
         </foreach>
       </if>
     </where>
-    GROUP BY  tas.pub_account_id, tas.ref_date ORDER BY tas.pub_account_id, tas.ref_date DESC;
+    GROUP BY  tas.pub_account_id, tas.ref_date ORDER BY tas.pub_account_id, tas.ref_date DESC
   </select>
 
 

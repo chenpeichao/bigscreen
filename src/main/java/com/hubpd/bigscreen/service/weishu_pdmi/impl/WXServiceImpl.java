@@ -1,5 +1,8 @@
 package com.hubpd.bigscreen.service.weishu_pdmi.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.hubpd.bigscreen.bean.weishu_pdmi.PubAccount;
 import com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs;
 import com.hubpd.bigscreen.mapper.weishu_pdmi.PubAccountMapper;
@@ -8,6 +11,7 @@ import com.hubpd.bigscreen.service.weishu_pdmi.WXService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WeiShuPdmiUserService;
 import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
+import com.hubpd.bigscreen.vo.WXArticleAnalyseVO;
 import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +66,7 @@ public class WXServiceImpl implements WXService {
             pubAccountIdListByUserIdList = weiShuPdmiUserService.findPubAccountIdListByUserIdList(uarBasicUserIdListByOrginId, 1);
         }
         // 2.1、对于机构对应的用户以及公众号进行打印
-        logger.info("在【"+DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") +"】查询机构id为【"+orginId+"】" + "对应用户id【"+uarBasicUserIdListByOrginId.toString()+"】，对应自用公众号id为【"+pubAccountIdListByUserIdList.toString()+"】");
+        logger.info("在【"+DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") +"】查询机构id为【"+orginId+"】" + "对应用户id【"+uarBasicUserIdListByOrginId.toString()+"】，对应自有公众号id为【"+pubAccountIdListByUserIdList.toString()+"】");
 
         // 2.2、定义查询的起始/结束时间，传递时间的前7天---昨天的数据
         String beginDateStr = "";
@@ -101,7 +105,6 @@ public class WXServiceImpl implements WXService {
                 }
             }
         }
-
 
         try {
             List<WXUserAnalyseVO> wxUserAnalyseVOList = new ArrayList<WXUserAnalyseVO>();
@@ -151,6 +154,70 @@ public class WXServiceImpl implements WXService {
 
             resultMap.put("code", 1);
             resultMap.put("data", resultWXUserAnalyseVOList);
+        } catch (Exception e) {
+            logger.error("查询出错，请稍后再试！", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "查询出错，请稍后再试！");
+        } finally {
+            return resultMap;
+        }
+    }
+
+    /**
+     * 根据机构id查询其下用户授权的公众号的前7天的公众号发文的内容ID、文章标题、文章链接（固定连接）、阅读数、点赞数
+     * @param orginId       机构Id
+     * @param searchDate    查询日期  yyyy-MM-dd
+     * @return
+     */
+    public Map<String, Object> getWXArticleList(String orginId, Date searchDate) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        // 1、查询uar环境中指定机构下的用户id列表
+        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
+
+        // 2、根据用户id列表查询其对应的公众号列表（1:自有，2：关注）
+        List<Integer> pubAccountIdListByUserIdList = new ArrayList<Integer>();
+        if(uarBasicUserIdListByOrginId.size() > 0) {
+            pubAccountIdListByUserIdList = weiShuPdmiUserService.findPubAccountIdListByUserIdList(uarBasicUserIdListByOrginId, 1);
+        }
+        // 2.1、对于机构对应的用户以及公众号进行打印
+        logger.info("在【"+DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") +"】查询机构id为【"+orginId+"】" + "对应用户id【"+uarBasicUserIdListByOrginId.toString()+"】，对应自有公众号id为【"+pubAccountIdListByUserIdList.toString()+"】");
+
+        // 2.2、定义查询的起始/结束时间，传递时间的前7天---昨天的数据
+        String beginDateStr = "";
+        String endDateStr = "";
+        try {
+            beginDateStr = DateUtils.getBeforeDateStrByDateAndPattern(searchDate, Constants.DATA_BACK_BEGIN_DAY_NUM, "yyyy-MM-dd");
+            endDateStr = DateUtils.getBeforeDateStrByDateAndPattern(searchDate, Constants.DATA_BACK_END_DAY_NUM, "yyyy-MM-dd");
+        } catch (Exception e) {
+            logger.error("请求参数，时间转换错误", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "接口调用失败，时间参数传递错误！！");
+            return resultMap;
+        }
+
+        try {
+            // 3、根据公众号id列表，查询文章信息以及指定日期段的阅读数和点赞数
+            List<WXArticleAnalyseVO> wxArticleAnalyseVOList = weiShuPdmiUserService.findgetWXArticleStatByAccountIdListAndSearchDate(pubAccountIdListByUserIdList, beginDateStr, endDateStr);
+
+            // 4、对微信文章数据，按照公众号名称排序，排序后对于每个公众号再按照数据时间倒序排列
+            Collections.sort(wxArticleAnalyseVOList, new Comparator<WXArticleAnalyseVO>() {
+                @Override
+                public int compare(WXArticleAnalyseVO o1, WXArticleAnalyseVO o2) {
+                    if(!o1.getWxNo().equals(o2.getWxNo())) {
+                        return o1.getWxNo().compareTo(o2.getWxNo());
+                    } else {
+                        if(!o1.getArticleId().equals(o2.getArticleId())) {
+                            return o1.getArticleId().compareTo(o2.getArticleId());
+                        } else {
+                            return -o1.getDateTime().compareTo(o2.getDateTime());
+                        }
+                    }
+                }
+            });
+
+            resultMap.put("code", 1);
+            resultMap.put("data", wxArticleAnalyseVOList);
         } catch (Exception e) {
             logger.error("查询出错，请稍后再试！", e);
             resultMap.put("code", 0);

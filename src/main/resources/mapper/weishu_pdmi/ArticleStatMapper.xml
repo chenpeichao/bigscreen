@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.weishu_pdmi.ArticleStatMapper" >
+  <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleStat" >
+    <result column="ref_date" property="refDate" jdbcType="DATE" />
+    <result column="article_id" property="articleId" jdbcType="BIGINT" />
+    <result column="pub_account_id" property="pubAccountId" jdbcType="INTEGER" />
+    <result column="publish_date" property="publishDate" jdbcType="DATE" />
+    <result column="msgid" property="msgid" jdbcType="VARCHAR" />
+    <result column="msgindex" property="msgindex" jdbcType="INTEGER" />
+    <result column="total_read_num" property="totalReadNum" jdbcType="INTEGER" />
+    <result column="total_like_num" property="totalLikeNum" jdbcType="INTEGER" />
+  </resultMap>
+  <!-- 根据公众号id列表查询微信用户点赞信息 -->
+  <select id="findgetWXArticleStatByAccountIdListAndSearchDate" resultType="com.hubpd.bigscreen.vo.WXArticleAnalyseVO" parameterType="java.util.Map" >
+    SELECT
+      ta.id AS 'articleId',
+      ta.title AS 'articleTitle',
+      ta.url AS 'articleUrl',
+      tas.ref_date AS 'dateTime',
+      tas.total_read_num AS 'readNum',
+      tas.total_like_num AS 'likeNum',
+      tpa.wx_id AS 'wxNo',
+      tpa.wx_name AS 'wxName'
+    FROM t_article_stat tas
+      LEFT JOIN t_article ta
+      ON tas.article_id = ta.id
+      LEFT JOIN t_pub_account tpa
+      ON tas.pub_account_id = tpa.id
+    <where>
+      <if test="beginDateStr !=null and beginDateStr != ''">
+        AND tas.ref_date >= #{beginDateStr}
+      </if>
+      <if test="endDateStr !=null and endDateStr != ''">
+        AND tas.ref_date <![CDATA[<=]]> #{endDateStr}
+      </if>
+      <if test="pubAccountIdListByUserIdList!=null and pubAccountIdListByUserIdList.size() > 0">
+        AND tas.pub_account_id in
+        <foreach collection="pubAccountIdListByUserIdList" item="pubAccountId"
+                 index="index" open="(" close=")" separator=",">
+          #{pubAccountId}
+        </foreach>
+      </if>
+    </where>
+  </select>
+
+
+
+
+  <insert id="insert" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleStat" >
+    insert into t_article_stat (ref_date, article_id, pub_account_id, 
+      publish_date, msgid, msgindex, 
+      total_read_num, total_like_num)
+    values (#{refDate,jdbcType=DATE}, #{articleId,jdbcType=BIGINT}, #{pubAccountId,jdbcType=INTEGER}, 
+      #{publishDate,jdbcType=DATE}, #{msgid,jdbcType=VARCHAR}, #{msgindex,jdbcType=INTEGER}, 
+      #{totalReadNum,jdbcType=INTEGER}, #{totalLikeNum,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.ArticleStat" >
+    insert into t_article_stat
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="refDate != null" >
+        ref_date,
+      </if>
+      <if test="articleId != null" >
+        article_id,
+      </if>
+      <if test="pubAccountId != null" >
+        pub_account_id,
+      </if>
+      <if test="publishDate != null" >
+        publish_date,
+      </if>
+      <if test="msgid != null" >
+        msgid,
+      </if>
+      <if test="msgindex != null" >
+        msgindex,
+      </if>
+      <if test="totalReadNum != null" >
+        total_read_num,
+      </if>
+      <if test="totalLikeNum != null" >
+        total_like_num,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="refDate != null" >
+        #{refDate,jdbcType=DATE},
+      </if>
+      <if test="articleId != null" >
+        #{articleId,jdbcType=BIGINT},
+      </if>
+      <if test="pubAccountId != null" >
+        #{pubAccountId,jdbcType=INTEGER},
+      </if>
+      <if test="publishDate != null" >
+        #{publishDate,jdbcType=DATE},
+      </if>
+      <if test="msgid != null" >
+        #{msgid,jdbcType=VARCHAR},
+      </if>
+      <if test="msgindex != null" >
+        #{msgindex,jdbcType=INTEGER},
+      </if>
+      <if test="totalReadNum != null" >
+        #{totalReadNum,jdbcType=INTEGER},
+      </if>
+      <if test="totalLikeNum != null" >
+        #{totalLikeNum,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>
