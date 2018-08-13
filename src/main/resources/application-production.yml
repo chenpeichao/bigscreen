@@ -16,3 +16,8 @@ cluster:
 #    username: lvsijia
 #    password: lvsijia
 #    driverClassName: com.mysql.jdbc.Driver
+spring:
+     data:
+        elasticsearch: #ElasticsearchProperties
+            cluster-name: elasticsearch_testuar
+            cluster-nodes: 10.10.32.58:9300

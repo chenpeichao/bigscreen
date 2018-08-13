@@ -1,12 +1,8 @@
 package com.hubpd.bigscreen.controller;
 
-import com.github.pagehelper.PageInfo;
-import com.hubpd.bigscreen.bean.uar_basic.UarBasicUser;
-import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.weishu_pdmi.WXService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,15 +10,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * 测试类
+ * 微信分析-泉州晚报大屏接口
  * Created by ceek on 2018-08-07 23:14.
  */
 @Controller
@@ -40,7 +36,10 @@ public class WXController {
      */
     @ResponseBody
     @PostMapping("/getWXUserAnalyse")
-    public Map<String, Object> getWXUserAnalyse(HttpServletRequest request){
+    public Map<String, Object> getWXUserAnalyse(HttpServletRequest request, HttpServletResponse response){
+        // 解决跨域问题
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String orginIdStr = request.getParameter("orginId");
@@ -87,7 +86,10 @@ public class WXController {
      */
     @ResponseBody
     @PostMapping("/getWXArticleList")
-    public Map<String, Object> getWXArticleList(HttpServletRequest request){
+    public Map<String, Object> getWXArticleList(HttpServletRequest request, HttpServletResponse response){
+        // 解决跨域问题
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String orginIdStr = request.getParameter("orginId");
