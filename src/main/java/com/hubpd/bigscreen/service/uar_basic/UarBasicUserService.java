@@ -5,6 +5,7 @@ import com.hubpd.bigscreen.bean.uar_basic.UarBasicUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * uar系统用户service
@@ -23,4 +24,20 @@ public interface UarBasicUserService {
      * @return
      */
     public List<String> findUarBasicUserIdListByOrginId(String orginId);
+
+
+    /**
+     * 根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
+     *
+     * @param userBasicUserIdList 用户id列表
+     * @return
+     */
+    public Map<String, List<String>> findAppaccountListByUserBasicUserIdList(List<String> userBasicUserIdList);
+
+    /**
+     * 查询所有的机构信息
+     *
+     * @return
+     */
+    public List<String> findAllOriginIdList();
 }

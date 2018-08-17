@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_basic.UarBasicAppinfoMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo">
+        <id column="appid" property="appid" jdbcType="INTEGER"/>
+        <result column="apptype" property="apptype" jdbcType="BIT"/>
+        <result column="appsubtype" property="appsubtype" jdbcType="VARCHAR"/>
+        <result column="appname" property="appname" jdbcType="VARCHAR"/>
+        <result column="domain" property="domain" jdbcType="VARCHAR"/>
+        <result column="appmedia" property="appmedia" jdbcType="VARCHAR"/>
+        <result column="apptag" property="apptag" jdbcType="INTEGER"/>
+        <result column="applog" property="applog" jdbcType="VARCHAR"/>
+        <result column="appaccount" property="appaccount" jdbcType="VARCHAR"/>
+        <result column="appaccount2" property="appaccount2" jdbcType="VARCHAR"/>
+        <result column="appdesc" property="appdesc" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="BIT"/>
+        <result column="atime" property="atime" jdbcType="TIMESTAMP"/>
+        <result column="aid" property="aid" jdbcType="CHAR"/>
+        <result column="mtime" property="mtime" jdbcType="TIMESTAMP"/>
+        <result column="mid" property="mid" jdbcType="CHAR"/>
+        <result column="deleted_at" property="deletedAt" jdbcType="TIMESTAMP"/>
+        <result column="sub_domain_regex" property="subDomainRegex" jdbcType="VARCHAR"/>
+        <result column="appscode" property="appscode" jdbcType="VARCHAR"/>
+        <result column="lang" property="lang" jdbcType="VARCHAR"/>
+        <result column="media_id" property="mediaId" jdbcType="INTEGER"/>
+    </resultMap>
+    <resultMap id="ResultMapWithBLOBs" type="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo"
+               extends="BaseResultMap">
+        <result column="contain_domain" property="containDomain" jdbcType="LONGVARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        appid, apptype, appsubtype, appname, domain, appmedia, apptag, applog, appaccount,
+        appaccount2, appdesc, status, atime, aid, mtime, mid, deleted_at, sub_domain_regex,
+        appscode, lang, media_id
+    </sql>
+    <sql id="Blob_Column_List">
+        contain_domain
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from t_appinfo
+        where appid = #{appid,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from t_appinfo
+        where appid = #{appid,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo">
+        insert into t_appinfo (appid, apptype, appsubtype,
+        appname, domain, appmedia,
+        apptag, applog, appaccount,
+        appaccount2, appdesc, status,
+        atime, aid, mtime,
+        mid, deleted_at, sub_domain_regex,
+        appscode, lang, media_id,
+        contain_domain)
+        values (#{appid,jdbcType=INTEGER}, #{apptype,jdbcType=BIT}, #{appsubtype,jdbcType=VARCHAR},
+        #{appname,jdbcType=VARCHAR}, #{domain,jdbcType=VARCHAR}, #{appmedia,jdbcType=VARCHAR},
+        #{apptag,jdbcType=INTEGER}, #{applog,jdbcType=VARCHAR}, #{appaccount,jdbcType=VARCHAR},
+        #{appaccount2,jdbcType=VARCHAR}, #{appdesc,jdbcType=VARCHAR}, #{status,jdbcType=BIT},
+        #{atime,jdbcType=TIMESTAMP}, #{aid,jdbcType=CHAR}, #{mtime,jdbcType=TIMESTAMP},
+        #{mid,jdbcType=CHAR}, #{deletedAt,jdbcType=TIMESTAMP}, #{subDomainRegex,jdbcType=VARCHAR},
+        #{appscode,jdbcType=VARCHAR}, #{lang,jdbcType=VARCHAR}, #{mediaId,jdbcType=INTEGER},
+        #{containDomain,jdbcType=LONGVARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo">
+        insert into t_appinfo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="appid != null">
+                appid,
+            </if>
+            <if test="apptype != null">
+                apptype,
+            </if>
+            <if test="appsubtype != null">
+                appsubtype,
+            </if>
+            <if test="appname != null">
+                appname,
+            </if>
+            <if test="domain != null">
+                domain,
+            </if>
+            <if test="appmedia != null">
+                appmedia,
+            </if>
+            <if test="apptag != null">
+                apptag,
+            </if>
+            <if test="applog != null">
+                applog,
+            </if>
+            <if test="appaccount != null">
+                appaccount,
+            </if>
+            <if test="appaccount2 != null">
+                appaccount2,
+            </if>
+            <if test="appdesc != null">
+                appdesc,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="atime != null">
+                atime,
+            </if>
+            <if test="aid != null">
+                aid,
+            </if>
+            <if test="mtime != null">
+                mtime,
+            </if>
+            <if test="mid != null">
+                mid,
+            </if>
+            <if test="deletedAt != null">
+                deleted_at,
+            </if>
+            <if test="subDomainRegex != null">
+                sub_domain_regex,
+            </if>
+            <if test="appscode != null">
+                appscode,
+            </if>
+            <if test="lang != null">
+                lang,
+            </if>
+            <if test="mediaId != null">
+                media_id,
+            </if>
+            <if test="containDomain != null">
+                contain_domain,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="appid != null">
+                #{appid,jdbcType=INTEGER},
+            </if>
+            <if test="apptype != null">
+                #{apptype,jdbcType=BIT},
+            </if>
+            <if test="appsubtype != null">
+                #{appsubtype,jdbcType=VARCHAR},
+            </if>
+            <if test="appname != null">
+                #{appname,jdbcType=VARCHAR},
+            </if>
+            <if test="domain != null">
+                #{domain,jdbcType=VARCHAR},
+            </if>
+            <if test="appmedia != null">
+                #{appmedia,jdbcType=VARCHAR},
+            </if>
+            <if test="apptag != null">
+                #{apptag,jdbcType=INTEGER},
+            </if>
+            <if test="applog != null">
+                #{applog,jdbcType=VARCHAR},
+            </if>
+            <if test="appaccount != null">
+                #{appaccount,jdbcType=VARCHAR},
+            </if>
+            <if test="appaccount2 != null">
+                #{appaccount2,jdbcType=VARCHAR},
+            </if>
+            <if test="appdesc != null">
+                #{appdesc,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=BIT},
+            </if>
+            <if test="atime != null">
+                #{atime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="aid != null">
+                #{aid,jdbcType=CHAR},
+            </if>
+            <if test="mtime != null">
+                #{mtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="mid != null">
+                #{mid,jdbcType=CHAR},
+            </if>
+            <if test="deletedAt != null">
+                #{deletedAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="subDomainRegex != null">
+                #{subDomainRegex,jdbcType=VARCHAR},
+            </if>
+            <if test="appscode != null">
+                #{appscode,jdbcType=VARCHAR},
+            </if>
+            <if test="lang != null">
+                #{lang,jdbcType=VARCHAR},
+            </if>
+            <if test="mediaId != null">
+                #{mediaId,jdbcType=INTEGER},
+            </if>
+            <if test="containDomain != null">
+                #{containDomain,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo">
+        update t_appinfo
+        <set>
+            <if test="apptype != null">
+                apptype = #{apptype,jdbcType=BIT},
+            </if>
+            <if test="appsubtype != null">
+                appsubtype = #{appsubtype,jdbcType=VARCHAR},
+            </if>
+            <if test="appname != null">
+                appname = #{appname,jdbcType=VARCHAR},
+            </if>
+            <if test="domain != null">
+                domain = #{domain,jdbcType=VARCHAR},
+            </if>
+            <if test="appmedia != null">
+                appmedia = #{appmedia,jdbcType=VARCHAR},
+            </if>
+            <if test="apptag != null">
+                apptag = #{apptag,jdbcType=INTEGER},
+            </if>
+            <if test="applog != null">
+                applog = #{applog,jdbcType=VARCHAR},
+            </if>
+            <if test="appaccount != null">
+                appaccount = #{appaccount,jdbcType=VARCHAR},
+            </if>
+            <if test="appaccount2 != null">
+                appaccount2 = #{appaccount2,jdbcType=VARCHAR},
+            </if>
+            <if test="appdesc != null">
+                appdesc = #{appdesc,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=BIT},
+            </if>
+            <if test="atime != null">
+                atime = #{atime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="aid != null">
+                aid = #{aid,jdbcType=CHAR},
+            </if>
+            <if test="mtime != null">
+                mtime = #{mtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="mid != null">
+                mid = #{mid,jdbcType=CHAR},
+            </if>
+            <if test="deletedAt != null">
+                deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="subDomainRegex != null">
+                sub_domain_regex = #{subDomainRegex,jdbcType=VARCHAR},
+            </if>
+            <if test="appscode != null">
+                appscode = #{appscode,jdbcType=VARCHAR},
+            </if>
+            <if test="lang != null">
+                lang = #{lang,jdbcType=VARCHAR},
+            </if>
+            <if test="mediaId != null">
+                media_id = #{mediaId,jdbcType=INTEGER},
+            </if>
+            <if test="containDomain != null">
+                contain_domain = #{containDomain,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where appid = #{appid,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo">
+        update t_appinfo
+        set apptype = #{apptype,jdbcType=BIT},
+        appsubtype = #{appsubtype,jdbcType=VARCHAR},
+        appname = #{appname,jdbcType=VARCHAR},
+        domain = #{domain,jdbcType=VARCHAR},
+        appmedia = #{appmedia,jdbcType=VARCHAR},
+        apptag = #{apptag,jdbcType=INTEGER},
+        applog = #{applog,jdbcType=VARCHAR},
+        appaccount = #{appaccount,jdbcType=VARCHAR},
+        appaccount2 = #{appaccount2,jdbcType=VARCHAR},
+        appdesc = #{appdesc,jdbcType=VARCHAR},
+        status = #{status,jdbcType=BIT},
+        atime = #{atime,jdbcType=TIMESTAMP},
+        aid = #{aid,jdbcType=CHAR},
+        mtime = #{mtime,jdbcType=TIMESTAMP},
+        mid = #{mid,jdbcType=CHAR},
+        deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+        sub_domain_regex = #{subDomainRegex,jdbcType=VARCHAR},
+        appscode = #{appscode,jdbcType=VARCHAR},
+        lang = #{lang,jdbcType=VARCHAR},
+        media_id = #{mediaId,jdbcType=INTEGER},
+        contain_domain = #{containDomain,jdbcType=LONGVARCHAR}
+        where appid = #{appid,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo">
+        update t_appinfo
+        set apptype = #{apptype,jdbcType=BIT},
+        appsubtype = #{appsubtype,jdbcType=VARCHAR},
+        appname = #{appname,jdbcType=VARCHAR},
+        domain = #{domain,jdbcType=VARCHAR},
+        appmedia = #{appmedia,jdbcType=VARCHAR},
+        apptag = #{apptag,jdbcType=INTEGER},
+        applog = #{applog,jdbcType=VARCHAR},
+        appaccount = #{appaccount,jdbcType=VARCHAR},
+        appaccount2 = #{appaccount2,jdbcType=VARCHAR},
+        appdesc = #{appdesc,jdbcType=VARCHAR},
+        status = #{status,jdbcType=BIT},
+        atime = #{atime,jdbcType=TIMESTAMP},
+        aid = #{aid,jdbcType=CHAR},
+        mtime = #{mtime,jdbcType=TIMESTAMP},
+        mid = #{mid,jdbcType=CHAR},
+        deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+        sub_domain_regex = #{subDomainRegex,jdbcType=VARCHAR},
+        appscode = #{appscode,jdbcType=VARCHAR},
+        lang = #{lang,jdbcType=VARCHAR},
+        media_id = #{mediaId,jdbcType=INTEGER}
+        where appid = #{appid,jdbcType=INTEGER}
+    </update>
+</mapper>

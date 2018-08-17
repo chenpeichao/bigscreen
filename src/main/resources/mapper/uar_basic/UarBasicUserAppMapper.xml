@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_basic.UarBasicUserAppMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_basic.UarBasicUserApp">
+        <result column="userid" property="userid" jdbcType="CHAR"/>
+        <result column="appid" property="appid" jdbcType="CHAR"/>
+        <result column="apptype" property="apptype" jdbcType="SMALLINT"/>
+        <result column="columnid" property="columnid" jdbcType="VARCHAR"/>
+        <result column="is_whole" property="isWhole" jdbcType="BIT"/>
+        <result column="mode" property="mode" jdbcType="BIT"/>
+        <result column="type" property="type" jdbcType="BIT"/>
+        <result column="groupid" property="groupid" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="BIT"/>
+        <result column="atime" property="atime" jdbcType="TIMESTAMP"/>
+        <result column="aid" property="aid" jdbcType="CHAR"/>
+    </resultMap>
+    <!-- 根据机构id查询其下所有用户信息 -->
+    <select id="findAppaccountListByUserBasicUserIdList" resultType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo"
+            parameterType="java.util.Map">
+        SELECT
+        ta.*
+        FROM t_appinfo ta
+        WHERE ta.appid IN (SELECT
+        tua.appid
+        FROM t_user_app tua
+        <where>
+            <if test="userBasicUserIdList!=null and userBasicUserIdList.size() > 0">
+                AND tua.userid IN
+                <foreach collection="userBasicUserIdList" item="userBasicUserId"
+                         index="index" open="(" close=")" separator=",">
+                    #{userBasicUserId}
+                </foreach>
+            </if>
+        </where>
+        )
+    </select>
+
+
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicUserApp">
+        insert into t_user_app (userid, appid, apptype,
+        columnid, is_whole, mode, type,
+        groupid, status, atime,
+        aid)
+        values (#{userid,jdbcType=CHAR}, #{appid,jdbcType=CHAR}, #{apptype,jdbcType=SMALLINT},
+        #{columnid,jdbcType=VARCHAR}, #{isWhole,jdbcType=BIT}, #{mode,jdbcType=BIT}, #{type,jdbcType=BIT},
+        #{groupid,jdbcType=INTEGER}, #{status,jdbcType=BIT}, #{atime,jdbcType=TIMESTAMP},
+        #{aid,jdbcType=CHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_basic.UarBasicUserApp">
+        insert into t_user_app
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null">
+                userid,
+            </if>
+            <if test="appid != null">
+                appid,
+            </if>
+            <if test="apptype != null">
+                apptype,
+            </if>
+            <if test="columnid != null">
+                columnid,
+            </if>
+            <if test="isWhole != null">
+                is_whole,
+            </if>
+            <if test="mode != null">
+                mode,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="groupid != null">
+                groupid,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="atime != null">
+                atime,
+            </if>
+            <if test="aid != null">
+                aid,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null">
+                #{userid,jdbcType=CHAR},
+            </if>
+            <if test="appid != null">
+                #{appid,jdbcType=CHAR},
+            </if>
+            <if test="apptype != null">
+                #{apptype,jdbcType=SMALLINT},
+            </if>
+            <if test="columnid != null">
+                #{columnid,jdbcType=VARCHAR},
+            </if>
+            <if test="isWhole != null">
+                #{isWhole,jdbcType=BIT},
+            </if>
+            <if test="mode != null">
+                #{mode,jdbcType=BIT},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=BIT},
+            </if>
+            <if test="groupid != null">
+                #{groupid,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=BIT},
+            </if>
+            <if test="atime != null">
+                #{atime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="aid != null">
+                #{aid,jdbcType=CHAR},
+            </if>
+        </trim>
+    </insert>
+</mapper>

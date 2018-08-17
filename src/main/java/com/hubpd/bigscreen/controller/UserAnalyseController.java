@@ -2,6 +2,7 @@ package com.hubpd.bigscreen.controller;
 
 import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +32,7 @@ public class UserAnalyseController {
     private UserAnalyseService userAnalyseService;
 
     /**
-     * 微信运营接口：微信公号、日期、新关注人数、取消关注人数、净增关注人数、累积关注人数、点赞总数； 数据是前一天往前7天的数据，每天调取1次，每个客户按最多10个公众号预估
+     * 用户分析接口，计算性别，青老中，前5地域
      * @param request
      * @return
      */
@@ -40,8 +44,20 @@ public class UserAnalyseController {
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        userAnalyseService.test();
+        String orginIdStr = request.getParameter("orginId");
+        if (StringUtils.isBlank(orginIdStr)) {
+            resultMap.put("code", 0);
+            resultMap.put("message", "机构id未传递");
+            return resultMap;
+        }
 
-        return resultMap;
+        try {
+            return userAnalyseService.getUserAnalyse(orginIdStr);
+        } catch (Exception e) {
+            logger.error("getUserAnalyse用户分析接口调用失败-发生未知错误", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "接口调用失败，请重试！！");
+            return resultMap;
+        }
     }
 }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.origin_return.OriginReturnRecordMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="origin_id" property="originId" jdbcType="VARCHAR"/>
+        <result column="return_date" property="returnDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <resultMap id="ResultMapWithBLOBs" type="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord"
+               extends="BaseResultMap">
+        <result column="return_json" property="returnJson" jdbcType="LONGVARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, origin_id, return_date
+    </sql>
+    <sql id="Blob_Column_List">
+        return_json
+    </sql>
+    <!-- 根据机构id和查询时间，查询接口返回值 -->
+    <select id="findOriginReturnRecordByOriginId" resultType="java.lang.String" parameterType="java.util.Map">
+        SELECT
+        return_json
+        FROM t_origin_return_record torr
+        WHERE torr.origin_id = #{originId} AND torr.return_date = #{searchDate}
+    </select>
+
+
+    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from t_origin_return_record
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from t_origin_return_record
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
+        insert into t_origin_return_record (id, origin_id, return_date,
+        return_json)
+        values (#{id,jdbcType=INTEGER}, #{originId,jdbcType=VARCHAR}, #{returnDate,jdbcType=TIMESTAMP},
+        #{returnJson,jdbcType=LONGVARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
+        insert into t_origin_return_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="originId != null">
+                origin_id,
+            </if>
+            <if test="returnDate != null">
+                return_date,
+            </if>
+            <if test="returnJson != null">
+                return_json,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="originId != null">
+                #{originId,jdbcType=VARCHAR},
+            </if>
+            <if test="returnDate != null">
+                #{returnDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="returnJson != null">
+                #{returnJson,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
+        update t_origin_return_record
+        <set>
+            <if test="originId != null">
+                origin_id = #{originId,jdbcType=VARCHAR},
+            </if>
+            <if test="returnDate != null">
+                return_date = #{returnDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="returnJson != null">
+                return_json = #{returnJson,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
+        update t_origin_return_record
+        set origin_id = #{originId,jdbcType=VARCHAR},
+        return_date = #{returnDate,jdbcType=TIMESTAMP},
+        return_json = #{returnJson,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
+        update t_origin_return_record
+        set origin_id = #{originId,jdbcType=VARCHAR},
+        return_date = #{returnDate,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

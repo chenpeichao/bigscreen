@@ -19,5 +19,5 @@ cluster:
 spring:
      data:
         elasticsearch: #ElasticsearchProperties
-            cluster-name: elasticsearch_testuar
-            cluster-nodes: 10.10.32.58:9300
+            cluster-name: elasticsearch_uar
+            cluster-nodes: 10.101.67.4:9300,10.101.67.6:9300

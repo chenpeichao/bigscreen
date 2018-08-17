@@ -22,6 +22,14 @@ weishu_pdmi:
     password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
 
+## 大屏接口数据返回值记录缓存库
+origin_return:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: root
+    driverClassName: com.mysql.jdbc.Driver
+
 
 spring:
      data:
