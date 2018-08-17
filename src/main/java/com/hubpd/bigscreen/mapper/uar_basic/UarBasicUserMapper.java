@@ -30,4 +30,11 @@ public interface UarBasicUserMapper {
      * @return
      */
     public List<String> findUarBasicUserIdListByOrginId(String orginId);
+
+    /**
+     * 查询所有的机构信息---uar系统本身存在
+     *
+     * @return
+     */
+    public List<String> findAllOriginIdListInUar();
 }

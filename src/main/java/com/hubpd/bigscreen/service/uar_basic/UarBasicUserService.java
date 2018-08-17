@@ -1,6 +1,7 @@
 package com.hubpd.bigscreen.service.uar_basic;
 
 import com.github.pagehelper.PageInfo;
+import com.hubpd.bigscreen.bean.uar_basic.UarBasicTaskOrgin;
 import com.hubpd.bigscreen.bean.uar_basic.UarBasicUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,9 +36,34 @@ public interface UarBasicUserService {
     public Map<String, List<String>> findAppaccountListByUserBasicUserIdList(List<String> userBasicUserIdList);
 
     /**
-     * 查询所有的机构信息
+     * 查询所有的机构信息---大屏缓存
      *
      * @return
      */
-    public List<String> findAllOriginIdList();
+    public List<String> findAllOriginIdListInBigscreen();
+
+    /**
+     * 根据机构id查询大屏缓存的机构信息
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    public List<UarBasicTaskOrgin> findTaskOriginByOriginIdInBigscreen(String orginId);
+
+    /**
+     * 保存大屏系统中机构信息
+     *
+     * @param uarBasicTaskOrgin 机构id相关信息
+     * @return
+     */
+    public void saveTaskOrgin(UarBasicTaskOrgin uarBasicTaskOrgin);
+
+    /**
+     * 查询所有的机构id列表信息，uar系统本身存在
+     *
+     * @return
+     */
+    public List<String> findAllOriginIdListInUar();
+
+
 }

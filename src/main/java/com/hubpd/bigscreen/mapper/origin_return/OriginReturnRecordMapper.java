@@ -27,4 +27,12 @@ public interface OriginReturnRecordMapper {
      * @return
      */
     public List<String> findOriginReturnRecordByOriginId(Map<String, Object> params);
+
+    /**
+     * 查询指定机构id的最新一条返回记录
+     *
+     * @param originId 机构id
+     * @return
+     */
+    public OriginReturnRecord findOriginReturnRecordByOriginIdAndLastDate(String originId);
 }

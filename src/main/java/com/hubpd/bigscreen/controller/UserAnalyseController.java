@@ -52,8 +52,8 @@ public class UserAnalyseController {
         }
 
         try {
-//            return userAnalyseService.getUserAnalyseReturnData(orginIdStr);
-            return userAnalyseService.getUserAnalyse(orginIdStr);
+            return userAnalyseService.getUserAnalyseReturnData(orginIdStr);
+//            return userAnalyseService.getUserAnalyse(orginIdStr);
         } catch (Exception e) {
             logger.error("getUserAnalyse用户分析接口调用失败-发生未知错误", e);
             resultMap.put("code", 0);

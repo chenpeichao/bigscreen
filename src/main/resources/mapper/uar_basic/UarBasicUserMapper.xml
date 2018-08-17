@@ -28,6 +28,10 @@
     from t_user
     where org_id = #{orginId,jdbcType=VARCHAR}
   </select>
+  <!-- 查询所有的机构id列表信息，uar系统本身存在 -->
+  <select id="findAllOriginIdListInUar" resultType="String">
+    SELECT org_Id FROM t_user WHERE org_Id IS NOT NULL GROUP BY org_Id
+  </select>
 
 
 

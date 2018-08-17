@@ -81,11 +81,40 @@ public class UarBasicUserServiceImpl implements UarBasicUserService {
     }
 
     /**
-     * 查询所有的机构信息
+     * 查询所有的机构信息---大屏缓存
      *
      * @return
      */
-    public List<String> findAllOriginIdList() {
-        return uarBasicTaskOrginMapper.findAllOriginIdList();
+    public List<String> findAllOriginIdListInBigscreen() {
+        return uarBasicTaskOrginMapper.findAllOriginIdListInBigscreen();
+    }
+
+    /**
+     * 根据机构id查询大屏缓存的机构信息
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    public List<UarBasicTaskOrgin> findTaskOriginByOriginIdInBigscreen(String orginId) {
+        return uarBasicTaskOrginMapper.findTaskOriginByOriginIdInBigscreen(orginId);
+    }
+
+    /**
+     * 保存大屏系统中机构信息
+     *
+     * @param uarBasicTaskOrgin 机构id相关信息
+     * @return
+     */
+    public void saveTaskOrgin(UarBasicTaskOrgin uarBasicTaskOrgin) {
+        uarBasicTaskOrginMapper.insertSelective(uarBasicTaskOrgin);
+    }
+
+    /**
+     * 查询所有的机构id列表信息，uar系统本身存在
+     *
+     * @return
+     */
+    public List<String> findAllOriginIdListInUar() {
+        return uarBasicUserMapper.findAllOriginIdListInUar();
     }
 }

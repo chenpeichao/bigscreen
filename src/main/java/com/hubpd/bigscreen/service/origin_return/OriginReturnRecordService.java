@@ -23,4 +23,12 @@ public interface OriginReturnRecordService {
      * @return
      */
     public String findOriginReturnRecordByOriginId(String originId, String searchDate);
+
+    /**
+     * 查询指定机构id的最新一条返回记录
+     *
+     * @param originId 机构id
+     * @return
+     */
+    public OriginReturnRecord findOriginReturnRecordByOriginIdAndLastDate(String originId);
 }

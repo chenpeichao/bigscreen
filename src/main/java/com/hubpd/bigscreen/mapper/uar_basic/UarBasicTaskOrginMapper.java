@@ -18,9 +18,17 @@ public interface UarBasicTaskOrginMapper {
     int updateByPrimaryKey(UarBasicTaskOrgin record);
 
     /**
-     * 查询所有的有效(status=1)机构id列表
+     * 查询所有的有效(status=1)机构id列表---大屏缓存
      *
      * @return
      */
-    public List<String> findAllOriginIdList();
+    public List<String> findAllOriginIdListInBigscreen();
+
+    /**
+     * 根据机构id查询大屏缓存的机构信息
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    public List<UarBasicTaskOrgin> findTaskOriginByOriginIdInBigscreen(String orginId);
 }

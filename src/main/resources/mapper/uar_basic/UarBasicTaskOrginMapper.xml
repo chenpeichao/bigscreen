@@ -10,11 +10,15 @@
     <sql id="Base_Column_List">
         id, org_id, create_time, status
     </sql>
-    <select id="findAllOriginIdList" resultType="java.lang.String">
+    <select id="findAllOriginIdListInBigscreen" resultType="java.lang.String">
         select
         org_id
         from t_task_orgin tto
         where tto.status = 1
+    </select>
+    <!-- 根据机构id查询大屏缓存的机构信息 -->
+    <select id="findTaskOriginByOriginIdInBigscreen" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT * FROM t_task_orgin tto WHERE tto.org_id = #{orginId} and tto.status = 1
     </select>
 
 

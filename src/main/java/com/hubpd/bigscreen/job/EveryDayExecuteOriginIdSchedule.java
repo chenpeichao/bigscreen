@@ -1,11 +1,13 @@
 package com.hubpd.bigscreen.job;
 
+import com.hubpd.bigscreen.service.common.TaskGetUserAnalyseService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
 import com.hubpd.bigscreen.service.uar_profile.impl.UserAnalyseServiceImpl;
 import com.hubpd.bigscreen.utils.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -26,20 +28,20 @@ public class EveryDayExecuteOriginIdSchedule {
     @Autowired
     private UarBasicUserService uarBasicUserService;
     @Autowired
-    private UserAnalyseService userAnalyseService;
+    private TaskGetUserAnalyseService taskGetUserAnalyseService;
 
-    @Scheduled(fixedRate = 1000 * 60 * 125)
-//    @Scheduled(cron="0 0 3 * * ?")
+    //    @Scheduled(fixedRate = 1000 * 60 * 125)
+    @Scheduled(cron = "0 0 3 * * ?")
     public void addTask() {
-        List<String> allOriginIdList = uarBasicUserService.findAllOriginIdList();
+        //查询大屏中缓存的所有有效的组织机构id列表
+        List<String> allOriginIdList = uarBasicUserService.findAllOriginIdListInBigscreen();
 
         logger.info("定时任务缓存根据机构id缓存用户分析指定机构当天数据");
 
         for (String originId : allOriginIdList) {
             // 对用户分析接口进行调用，目的为了缓存当天接口返回值到mysql数据库
             try {
-
-                Map<String, Object> userAnalyse = userAnalyseService.getUserAnalyse(originId);
+                Map<String, Object> userAnalyse = taskGetUserAnalyseService.getUserAnalyse(originId);
                 if (userAnalyse != null) {
                     logger.info("缓存根据机构id【" + originId + "】用户分析指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");
                 }

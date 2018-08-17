@@ -23,6 +23,12 @@
         FROM uar_origin_return_record torr
         WHERE torr.origin_id = #{originId} AND torr.return_date = #{searchDate}
     </select>
+    <!-- 查询指定机构id的最新一条返回记录 -->
+    <select id="findOriginReturnRecordByOriginIdAndLastDate" resultMap="ResultMapWithBLOBs"
+            parameterType="java.lang.String">
+        SELECT * FROM uar_origin_return_record uorr WHERE uorr.origin_id = #{originId} ORDER BY return_date DESC LIMIT
+        0,1
+    </select>
 
 
     <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
