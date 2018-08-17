@@ -54,3 +54,56 @@
 
     ORDER BY pub_account_id, tasd.ref_date1 DESC;
 
+3、用户分析中的地域字典表和接口返回值
+CREATE TABLE `uar_tag_dic_region` (
+   `id` INT(10) NOT NULL AUTO_INCREMENT COMMENT '自增主键id',
+   `region_name` VARCHAR(255) NOT NULL COMMENT '省份名称',
+   `status` INT(2) NOT NULL DEFAULT '1' COMMENT '失效标识；0：失效，1：生效',
+   PRIMARY KEY (`id`)
+ ) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='省份字典表';
+
+
+ CREATE TABLE `uar_origin_return_record` (
+   `id` INT(10) NOT NULL AUTO_INCREMENT COMMENT '主键自增id',
+   `origin_id` VARCHAR(255) NOT NULL COMMENT '机构id',
+   `return_json` TEXT NOT NULL COMMENT '返回值',
+   `return_date` VARCHAR(32) NOT NULL COMMENT '返回时间',
+   PRIMARY KEY (`id`)
+ ) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='大屏接口调用记录表';
+
+
+4、省份字典表：
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('北京','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('上海','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('重庆','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('广东','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('天津','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('浙江','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('澳门','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('广西','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('内蒙古','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('宁夏','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('江西','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('台湾','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('安徽','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('陕西','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('辽宁','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('山西','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('青海','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('香港','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('四川','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('江苏','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('河北','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('西藏','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('福建','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('吉林','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('新疆','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('海南','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('湖北','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('云南','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('甘肃','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('湖南','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('河南','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('山东','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('黑龙江','1');
+    INSERT INTO `uar_tag_dic_region` (`region_name`, `status`) VALUES('贵州','1');

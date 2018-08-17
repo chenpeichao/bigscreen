@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 每天3点定时缓存所有机构的用户分析信息到mysql数据库
+ * 每天3点定时缓存所有有效机构的用户分析信息到mysql数据库
  *
  * @author cpc
  * @create 2018-08-15 20:06
@@ -38,6 +38,7 @@ public class EveryDayExecuteOriginIdSchedule {
         for (String originId : allOriginIdList) {
             // 对用户分析接口进行调用，目的为了缓存当天接口返回值到mysql数据库
             try {
+
                 Map<String, Object> userAnalyse = userAnalyseService.getUserAnalyse(originId);
                 if (userAnalyse != null) {
                     logger.info("缓存根据机构id【" + originId + "】用户分析指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");

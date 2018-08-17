@@ -59,7 +59,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
     @Autowired
     private DicRegionService dicRegionService;
 
-
     @Autowired
     private UserAnalyseMapper userAnalyseMapper;
 
@@ -76,50 +75,10 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
      * @param orginId 机构id
      * @return
      */
-    public Map<String, Object> getUserAnalyse1(String orginId) {
-//        Long aaa = userAnalyseMapper.findByAtAndTagCountAndAgeCount("青年", "UAR-000139_459");
-//        testAge("UAR-000139_459", "青年");
-//        testAge("UAR-000139_459", "中年");
-//        testAge("UAR-000139_459", "老年");
+    public Map<String, Object> getUserAnalyseReturnData(String orginId) {
+//        uarBasicUserService.find
         return null;
     }
-
-//    /**
-//     * 用户分析接口，计算性别，青老中，前5地域
-//     * @param orginId           机构id
-//     * @return
-//     */
-//    public Map<String, Object> getUserAnalyse(String orginId) {
-//        Map<String, Object> resultMap = new HashMap<String, Object>();
-//
-//        //根据机构id查询其下用户数据
-//        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
-//        if(uarBasicUserIdListByOrginId == null || uarBasicUserIdListByOrginId.size() == 0) {
-//            logger.info("机构下没有对应的用户数据");
-//            resultMap.put("code", 1);
-//            resultMap.put("data", new ArrayList());
-//            return resultMap;
-//        }
-//
-//        //根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
-//        Map<String, List<String>> appaccountMap = uarBasicUserService.findAppaccountListByUserBasicUserIdList(uarBasicUserIdListByOrginId);
-//
-////        List<UserAnalyse> dataList = userAnalyseMapper.findByAtAndTag_CountAndAge("UAR-000159_219", 4, "青年");
-//
-//        UserAnalyse mx0con2itd20qodiol53jow7g4npfhb9 = userAnalyseMapper.findOne("mx0con2itd20qodiol53jow7g4npfhb9");
-//
-//        Pageable pageable = new PageRequest(0,3);
-//        List dev = userAnalyseMapper.findByAtAndTagCountAndAge("青年", "UAR-000159_219", pageable);
-//
-////        Long abc = userAnalyseMapper.countByAtLikeAndAgeAndTag_CountGreaterThan("UAR-000159_219", "青年", 0);
-//
-////        System.out.println(dataList);
-//
-//        resultMap.put("code", 1);
-//        resultMap.put("data", 1);
-//        return resultMap;
-//    }
-
     /**
      * 用户分析接口，计算性别，青老中，前5地域
      *
@@ -174,6 +133,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
 
                 List<String> allDicRegionName = dicRegionService.findAllDicRegionName();
                 List<UserAnalyseRegionVO> userAnalyseRegionVOList = new ArrayList<UserAnalyseRegionVO>();
+                //遍历所有省份的信息
                 for (String regionName : allDicRegionName) {
                     UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
                     userAnalyseRegionVO.setRegionName(regionName);
@@ -181,7 +141,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
                     userAnalyseRegionVOList.add(userAnalyseRegionVO);
                 }
 
-                //当有两个appkey时累加
+                //当有两个appkey时累加---即是移动应用有android和ios的appkey的区分
                 if (appaccountList.size() > 1) {
                     Long maleNum1 = getTotalElements(appaccountList.get(1), "sex", "男");
                     Long female1 = getTotalElements(appaccountList.get(1), "sex", "女");
@@ -194,12 +154,14 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
                     userAnalyseVO.getAge().put("middleNum", userAnalyseVO.getAge().get("middleNum") + middleNum1);
                     userAnalyseVO.getAge().put("oldNum", userAnalyseVO.getAge().get("oldNum") + oldNum1);
 
-                    List<UserAnalyseRegionVO> userAnalyseRegionVOList1 = new ArrayList<UserAnalyseRegionVO>();
                     for (String regionName : allDicRegionName) {
-                        UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
-                        userAnalyseRegionVO.setRegionName(regionName);
-                        userAnalyseRegionVO.setNum(getTotalElements(appaccountList.get(1), "province", regionName));
-                        userAnalyseRegionVOList.add(userAnalyseRegionVO);
+                        Long provinceNum1 = getTotalElements(appaccountList.get(1), "province", regionName);
+                        for (UserAnalyseRegionVO userAnalyseRegionVO : userAnalyseRegionVOList) {
+                            if (userAnalyseRegionVO.getRegionName().equals(regionName)) {
+                                userAnalyseRegionVO.setNum(userAnalyseRegionVO.getNum() + provinceNum1);
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -210,7 +172,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
                         return tmp.intValue();
                     }
                 });
-                userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, 5));
+                userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
             }
             userAnalyseVO.setAppName(appName);
             userAnalyseVOList.add(userAnalyseVO);
@@ -235,152 +197,12 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
     }
 
     /**
-     * 用户分析接口，计算性别，青老中，前5地域
-     *
-     * @param orginId 机构id
+     * 根据指定appkey以及指定字段查询es中的总数据量
+     * @param at                appkey应用标识
+     * @param queryField        待查询es标识
+     * @param queryParam        查询参数值
      * @return
      */
-    public Map<String, Object> getUserAnalyse_bak(String orginId) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-
-        String currentDateStr = DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd");
-
-        // 根据机构id查询其下用户数据
-        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
-        if (uarBasicUserIdListByOrginId == null || uarBasicUserIdListByOrginId.size() == 0) {
-            logger.info("机构下没有对应的用户数据");
-            resultMap.put("code", 1);
-            resultMap.put("data", new ArrayList());
-            return resultMap;
-        }
-
-        // 首先从mysql数据库中查询数据，如果有数据，则直接返回，没有则进行es计算返回，并保存查询天和机构的数据到mysql数据库缓存
-        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
-        if (StringUtils.isNotBlank(originReturnRecordStr)) {
-            resultMap.put("code", 1);
-            resultMap.put("data", JSON.parse(originReturnRecordStr));
-            return resultMap;
-        }
-
-        // 根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
-        Map<String, List<String>> appaccountMap = uarBasicUserService.findAppaccountListByUserBasicUserIdList(uarBasicUserIdListByOrginId);
-
-        // 对于机构对应的用户以及公众号进行打印
-        logger.info("在【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginId + "】" + "对应用户id【" + uarBasicUserIdListByOrginId.toString() + "】，对应应用信息为【" + appaccountMap.toString() + "】");
-
-        List<UserAnalyseVO> userAnalyseVOList = new ArrayList<UserAnalyseVO>();
-        UserAnalyseVO userAnalyseVO = new UserAnalyseVO();
-
-
-        //根据应用名称，获取应用的appacount(即应用的at)
-        Map<String, Object> tmpMap = new HashMap<String, Object>();
-        String appcount = "UAR-000139_459";
-        Long maleNum = getTotalElements(appcount, "sex", "男");
-        Long female = getTotalElements(appcount, "sex", "女");
-        userAnalyseVO.getGender().put("female", female);
-        userAnalyseVO.getGender().put("maleNum", maleNum);
-        Long young = getTotalElements(appcount, "age", "青年");
-        Long middleNum = getTotalElements(appcount, "age", "中年");
-        Long oldNum = getTotalElements(appcount, "age", "老年");
-        userAnalyseVO.getAge().put("young", young);
-        userAnalyseVO.getAge().put("middleNum", middleNum);
-        userAnalyseVO.getAge().put("oldNum", oldNum);
-
-        List<String> allDicRegionName = dicRegionService.findAllDicRegionName();
-        List<UserAnalyseRegionVO> userAnalyseRegionVOList = new ArrayList<UserAnalyseRegionVO>();
-        for (String regionName : allDicRegionName) {
-            UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
-            userAnalyseRegionVO.setRegionName(regionName);
-            userAnalyseRegionVO.setNum(getTotalElements(appcount, "province", regionName));
-            userAnalyseRegionVOList.add(userAnalyseRegionVO);
-        }
-        userAnalyseVO.setRegion(userAnalyseRegionVOList);
-
-        userAnalyseVOList.add(userAnalyseVO);
-        System.out.println(userAnalyseVO);
-
-//        Map<String, Long> sexStatistic = getSexStatistic(appcount, "sex");
-//        Map<String, Long> ageStatistic = getAgeStatistic(appcount, "age");
-//        Map<String, List<UserAnalyseRegionVO>> provinceStatistic = getProvinceStatistic(appcount, "province", 5);
-//        tmpMap.put("sex_" + appcount, sexStatistic);
-//        tmpMap.put("age_" + appcount, ageStatistic);
-//        tmpMap.put("province_" + appcount, provinceStatistic);
-
-//        List<Object> dataList = new ArrayList<Object>();
-//        int count = 0;
-//        for(String appName : appaccountMap.keySet()) {
-//            //根据应用名称，获取应用的appacount(即应用的at)
-//            List<String> appaccountList = appaccountMap.get(appName);
-//
-//            Map<String, Object> tmpMap = new HashMap<String, Object>();
-//            if (appaccountList != null && appaccountList.size() > 0) {
-//                Map<String, Long> sexStatistic = getSexStatistic(appaccountList.get(0));
-//                Map<String, Long> ageStatistic = getAgeStatistic(appaccountList.get(0));
-//                Map<String, List<UserAnalyseRegionVO>> provinceStatistic = getProvinceStatistic(appaccountList.get(0), 5);
-//                tmpMap.put("gender", sexStatistic);
-//                tmpMap.put("age", ageStatistic);
-//                tmpMap.put("region", provinceStatistic.get("region"));
-//                if(appaccountList.size() > 1) {
-//                    Map<String, Long> sexStatistic2 = getSexStatistic(appaccountList.get(1));
-//                    Map<String, Long> ageStatistic2 = getAgeStatistic(appaccountList.get(1));
-//                    Map<String, List<UserAnalyseRegionVO>> provinceStatistic2 = getProvinceStatistic(appaccountList.get(1), 5);
-//                    sexStatistic.put("female", sexStatistic.get("female") + sexStatistic2.get("female"));
-//                    sexStatistic.put("maleNum", sexStatistic.get("maleNum") + sexStatistic2.get("maleNum"));
-//                    ageStatistic.put("young", ageStatistic.get("young") + ageStatistic2.get("young"));
-//                    ageStatistic.put("middleNum", ageStatistic.get("middleNum") + ageStatistic2.get("middleNum"));
-//                    ageStatistic.put("oldNum", ageStatistic.get("oldNum") + ageStatistic2.get("oldNum"));
-//
-//                    List<UserAnalyseRegionVO> userAnalyseRegionVOList1 = (List<UserAnalyseRegionVO>)provinceStatistic.get("region");
-//                    List<UserAnalyseRegionVO> userAnalyseRegionVOList2 = (List<UserAnalyseRegionVO>)provinceStatistic2.get("region");
-//                    userAnalyseRegionVOList1.addAll(userAnalyseRegionVOList2);
-//                    userAnalyseRegionVOList1.sort(new Comparator<UserAnalyseRegionVO>() {
-//                        @Override
-//                        public int compare(UserAnalyseRegionVO o1, UserAnalyseRegionVO o2) {
-//                            Long tmp = o2.getNum() - o1.getNum();
-//                            return tmp.intValue();
-//                        }
-//                    });
-//
-//                    tmpMap.put("region", userAnalyseRegionVOList1.subList(0,userAnalyseRegionVOList1.size() > 5 ? 5 : userAnalyseRegionVOList1.size()));
-//                }
-//            }
-////            if (appaccountList != null) {
-////                for(String appaccount : appaccountList) {
-////                    Map<String, Long> sexStatistic = getSexStatistic(appaccount);
-////                    Map<String, Long> ageStatistic = getAgeStatistic(appaccount);
-////                    Map<String, Object> provinceStatistic = getProvinceStatistic(appaccount, 5);
-////                    tmpMap.put("gender", sexStatistic);
-////                    tmpMap.put("age", ageStatistic);
-////                    tmpMap.put("region", provinceStatistic);
-//////                    tmpMap.put("sex_" + appaccountList + "_" + appName, sexStatistic);
-//////                    tmpMap.put("age_" + appaccountList + "_" + appName, ageStatistic);
-//////                    tmpMap.put("province_" + appaccountList + "_" + appName, provinceStatistic);
-////                }
-////            }
-//            tmpMap.put("appName", appName);
-//            dataList.add(tmpMap);
-//        }
-
-        logger.info("机构id为【" + orginId + "】的数据打印完成");
-        // 对于指定机构在指定查询日期的返回数据，进行mysql数据库的缓存
-        String returnDate = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
-        if (StringUtils.isBlank(returnDate)) {
-            OriginReturnRecord originReturnRecord = new OriginReturnRecord();
-            originReturnRecord.setOriginId(orginId);
-            originReturnRecord.setReturnDate(currentDateStr);
-            originReturnRecord.setReturnJson(JSON.toJSONString(userAnalyseVOList));
-
-            //接口返回记录保存mysql，缓存
-            originReturnRecordService.insert(originReturnRecord);
-        }
-
-        resultMap.put("code", 1);
-//        resultMap.put("data", dataList);
-        resultMap.put("data", userAnalyseVO);
-        resultMap.put("data2", userAnalyseVOList);
-        return resultMap;
-    }
-
     public Long getTotalElements(String at, String queryField, String queryParam) {
         BoolQueryBuilder builder = QueryBuilders.boolQuery();
         builder.must(QueryBuilders.termQuery(queryField, queryParam));
@@ -407,6 +229,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
         return resutlList.getTotalElements();
     }
 
+
     private Map<String, Long> getSexStatistic(String at, String aggreParam) {
         Map<String, Long> resultMap1 = new HashMap<String, Long>();
         Map<String, Long> resultMap2 = new HashMap<String, Long>();
@@ -415,7 +238,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             BoolQueryBuilder builder = QueryBuilders.boolQuery();
             builder.must(QueryBuilders.queryStringQuery("at : " + at));
             builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
-            builder.must(QueryBuilders.termQuery("last_time", "2018-08-07"));
             //2.构建查询
             NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
             //2.0 设置QueryBuilder
@@ -467,7 +289,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             BoolQueryBuilder builder = QueryBuilders.boolQuery();
             builder.must(QueryBuilders.queryStringQuery("at : " + at));
             builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
-            builder.must(QueryBuilders.termQuery("last_time", "2018-08-07"));
             //2.构建查询
             NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
             //2.0 设置QueryBuilder
@@ -520,7 +341,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             BoolQueryBuilder builder = QueryBuilders.boolQuery();
             builder.must(QueryBuilders.queryStringQuery("at : " + at));
             builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
-            builder.must(QueryBuilders.termQuery("last_time", "2018-08-07"));
             //2.构建查询
             NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
             //2.0 设置QueryBuilder
@@ -666,19 +486,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
     private QueryBuilder atQuery(String at) {
         return mustQuery(queryStringQuery("at", at), queryHasCount());
     }
-    private QueryBuilder atQuery1(List<String> at) {
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-
-        if (at.size() > 1) {
-            boolQuery.should(QueryBuilders.queryStringQuery("at" + ":" + at.get(0)));
-            boolQuery.should(QueryBuilders.queryStringQuery("at" + ":" + at.get(1)));
-//            boolQuery.should(QueryBuilders.queryStringQuery("site_name" + ":" + "平安校园" ));
-        } else {
-            boolQuery.should(QueryBuilders.queryStringQuery("at" + ":" + at.get(0)));
-        }
-        boolQuery.filter(QueryBuilders.rangeQuery("tag_count").gt(0));
-        return boolQuery;
-    }
 
     // 同时符合条件
     private QueryBuilder mustQuery(QueryBuilder... querys) {
@@ -692,21 +499,179 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
     private QueryBuilder queryStringQuery(String field, String value) {
         return QueryBuilders.queryStringQuery(field + ":" + value );
     }
-    private QueryBuilder termQuery(String field, List<String> valueList) {
-        if (valueList.size() > 1) {
-            QueryBuilder queryBuilder = QueryBuilders.matchPhraseQuery(field, valueList.get(0));
-            QueryBuilder queryBuilder1 = QueryBuilders.matchPhraseQuery(field, valueList.get(1));
-
-            return queryBuilder;
-        } else {
-            QueryBuilder queryBuilder = QueryBuilders.matchPhraseQuery(field, valueList.get(0));
-            return queryBuilder;
-        }
-    }
 
     // 查询标签数大于0
     private QueryBuilder queryHasCount() {
         return QueryBuilders.boolQuery()
                 .filter(QueryBuilders.rangeQuery("tag_count").gt(0));
     }
+
+
+    /**
+     * 用户分析接口，计算性别，青老中，前5地域
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    public Map<String, Object> getUserAnalyse_bak(String orginId) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String currentDateStr = DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd");
+
+        // 根据机构id查询其下用户数据
+        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
+        if (uarBasicUserIdListByOrginId == null || uarBasicUserIdListByOrginId.size() == 0) {
+            logger.info("机构下没有对应的用户数据");
+            resultMap.put("code", 1);
+            resultMap.put("data", new ArrayList());
+            return resultMap;
+        }
+
+        // 首先从mysql数据库中查询数据，如果有数据，则直接返回，没有则进行es计算返回，并保存查询天和机构的数据到mysql数据库缓存
+        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+        if (StringUtils.isNotBlank(originReturnRecordStr)) {
+            resultMap.put("code", 1);
+            resultMap.put("data", JSON.parse(originReturnRecordStr));
+            return resultMap;
+        }
+
+        // 根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
+        Map<String, List<String>> appaccountMap = uarBasicUserService.findAppaccountListByUserBasicUserIdList(uarBasicUserIdListByOrginId);
+
+        // 对于机构对应的用户以及公众号进行打印
+        logger.info("在【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginId + "】" + "对应用户id【" + uarBasicUserIdListByOrginId.toString() + "】，对应应用信息为【" + appaccountMap.toString() + "】");
+
+//        List<UserAnalyseVO> userAnalyseVOList = new ArrayList<UserAnalyseVO>();
+//        UserAnalyseVO userAnalyseVO = new UserAnalyseVO();
+//        //根据应用名称，获取应用的appacount(即应用的at)
+//        Map<String, Object> tmpMap = new HashMap<String, Object>();
+//        String appcount = "UAR-000139_459";
+//        Long maleNum = getTotalElements(appcount, "sex", "男");
+//        Long female = getTotalElements(appcount, "sex", "女");
+//        userAnalyseVO.getGender().put("female", female);
+//        userAnalyseVO.getGender().put("maleNum", maleNum);
+//        Long young = getTotalElements(appcount, "age", "青年");
+//        Long middleNum = getTotalElements(appcount, "age", "中年");
+//        Long oldNum = getTotalElements(appcount, "age", "老年");
+//        userAnalyseVO.getAge().put("young", young);
+//        userAnalyseVO.getAge().put("middleNum", middleNum);
+//        userAnalyseVO.getAge().put("oldNum", oldNum);
+//
+//        List<String> allDicRegionName = dicRegionService.findAllDicRegionName();
+//        List<UserAnalyseRegionVO> userAnalyseRegionVOList = new ArrayList<UserAnalyseRegionVO>();
+//        for (String regionName : allDicRegionName) {
+//            UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
+//            userAnalyseRegionVO.setRegionName(regionName);
+//            userAnalyseRegionVO.setNum(getTotalElements(appcount, "province", regionName));
+//            userAnalyseRegionVOList.add(userAnalyseRegionVO);
+//        }
+//        userAnalyseVO.setRegion(userAnalyseRegionVOList);
+//
+//        userAnalyseVOList.add(userAnalyseVO);
+//        System.out.println(userAnalyseVO);
+
+//        Map<String, Long> sexStatistic = getSexStatistic(appcount, "sex");
+//        Map<String, Long> ageStatistic = getAgeStatistic(appcount, "age");
+//        Map<String, List<UserAnalyseRegionVO>> provinceStatistic = getProvinceStatistic(appcount, "province", 5);
+//        tmpMap.put("sex_" + appcount, sexStatistic);
+//        tmpMap.put("age_" + appcount, ageStatistic);
+//        tmpMap.put("province_" + appcount, provinceStatistic);
+
+        List<Object> dataList = new ArrayList<Object>();
+        int count = 0;
+        for (String appName : appaccountMap.keySet()) {
+            //根据应用名称，获取应用的appacount(即应用的at)
+            List<String> appaccountList = appaccountMap.get(appName);
+
+            Map<String, Object> tmpMap = new HashMap<String, Object>();
+            if (appaccountList != null && appaccountList.size() > 0) {
+                Map<String, Long> sexStatistic = getSexStatistic(appaccountList.get(0));
+                Map<String, Long> ageStatistic = getAgeStatistic(appaccountList.get(0));
+                Map<String, List<UserAnalyseRegionVO>> provinceStatistic = getProvinceStatistic(appaccountList.get(0), 5);
+                tmpMap.put("gender", sexStatistic);
+                tmpMap.put("age", ageStatistic);
+                tmpMap.put("region", provinceStatistic.get("region"));
+                if (appaccountList.size() > 1) {
+                    Map<String, Long> sexStatistic2 = getSexStatistic(appaccountList.get(1));
+                    Map<String, Long> ageStatistic2 = getAgeStatistic(appaccountList.get(1));
+                    Map<String, List<UserAnalyseRegionVO>> provinceStatistic2 = getProvinceStatistic(appaccountList.get(1), 5);
+                    sexStatistic.put("female", sexStatistic.get("female") + sexStatistic2.get("female"));
+                    sexStatistic.put("maleNum", sexStatistic.get("maleNum") + sexStatistic2.get("maleNum"));
+                    ageStatistic.put("young", ageStatistic.get("young") + ageStatistic2.get("young"));
+                    ageStatistic.put("middleNum", ageStatistic.get("middleNum") + ageStatistic2.get("middleNum"));
+                    ageStatistic.put("oldNum", ageStatistic.get("oldNum") + ageStatistic2.get("oldNum"));
+
+                    List<UserAnalyseRegionVO> userAnalyseRegionVOList1 = (List<UserAnalyseRegionVO>) provinceStatistic.get("region");
+                    List<UserAnalyseRegionVO> userAnalyseRegionVOList2 = (List<UserAnalyseRegionVO>) provinceStatistic2.get("region");
+                    userAnalyseRegionVOList1.addAll(userAnalyseRegionVOList2);
+                    userAnalyseRegionVOList1.sort(new Comparator<UserAnalyseRegionVO>() {
+                        @Override
+                        public int compare(UserAnalyseRegionVO o1, UserAnalyseRegionVO o2) {
+                            Long tmp = o2.getNum() - o1.getNum();
+                            return tmp.intValue();
+                        }
+                    });
+
+                    tmpMap.put("region", userAnalyseRegionVOList1.subList(0, userAnalyseRegionVOList1.size() > 5 ? 5 : userAnalyseRegionVOList1.size()));
+                }
+            }
+            tmpMap.put("appName", appName);
+            dataList.add(tmpMap);
+        }
+
+        logger.info("机构id为【" + orginId + "】的数据打印完成");
+        // 对于指定机构在指定查询日期的返回数据，进行mysql数据库的缓存
+        String returnDate = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+        if (StringUtils.isBlank(returnDate)) {
+            OriginReturnRecord originReturnRecord = new OriginReturnRecord();
+            originReturnRecord.setOriginId(orginId);
+            originReturnRecord.setReturnDate(currentDateStr);
+            originReturnRecord.setReturnJson(JSON.toJSONString(dataList));
+
+            //接口返回记录保存mysql，缓存
+            originReturnRecordService.insert(originReturnRecord);
+        }
+
+        resultMap.put("code", 1);
+        resultMap.put("data", dataList);
+//        resultMap.put("data", userAnalyseVOList);
+        return resultMap;
+    }
+
+
+    //    /**
+//     * 用户分析接口，计算性别，青老中，前5地域
+//     * @param orginId           机构id
+//     * @return
+//     */
+//    public Map<String, Object> getUserAnalyse(String orginId) {
+//        Map<String, Object> resultMap = new HashMap<String, Object>();
+//
+//        //根据机构id查询其下用户数据
+//        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
+//        if(uarBasicUserIdListByOrginId == null || uarBasicUserIdListByOrginId.size() == 0) {
+//            logger.info("机构下没有对应的用户数据");
+//            resultMap.put("code", 1);
+//            resultMap.put("data", new ArrayList());
+//            return resultMap;
+//        }
+//
+//        //根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
+//        Map<String, List<String>> appaccountMap = uarBasicUserService.findAppaccountListByUserBasicUserIdList(uarBasicUserIdListByOrginId);
+//
+////        List<UserAnalyse> dataList = userAnalyseMapper.findByAtAndTag_CountAndAge("UAR-000159_219", 4, "青年");
+//
+//        UserAnalyse mx0con2itd20qodiol53jow7g4npfhb9 = userAnalyseMapper.findOne("mx0con2itd20qodiol53jow7g4npfhb9");
+//
+//        Pageable pageable = new PageRequest(0,3);
+//        List dev = userAnalyseMapper.findByAtAndTagCountAndAge("青年", "UAR-000159_219", pageable);
+//
+////        Long abc = userAnalyseMapper.countByAtLikeAndAgeAndTag_CountGreaterThan("UAR-000159_219", "青年", 0);
+//
+////        System.out.println(dataList);
+//
+//        resultMap.put("code", 1);
+//        resultMap.put("data", 1);
+//        return resultMap;
+//    }
 }

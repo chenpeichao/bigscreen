@@ -13,7 +13,7 @@
     <select id="findAllDicRegionName" resultType="java.lang.String">
         select
         tdr.region_name
-        from t_dic_region tdr
+        from uar_tag_dic_region tdr
         where tdr.status=1
     </select>
 
@@ -21,21 +21,21 @@
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         select
         <include refid="Base_Column_List"/>
-        from t_dic_region
+        from uar_tag_dic_region
         where id = #{id,jdbcType=INTEGER}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-        delete from t_dic_region
+        delete from uar_tag_dic_region
         where id = #{id,jdbcType=INTEGER}
     </delete>
     <insert id="insert" parameterType="com.hubpd.bigscreen.bean.origin_return.DicRegion">
-        insert into t_dic_region (id, region_name, status
+        insert into uar_tag_dic_region (id, region_name, status
         )
         values (#{id,jdbcType=INTEGER}, #{regionName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}
         )
     </insert>
     <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.origin_return.DicRegion">
-        insert into t_dic_region
+        insert into uar_tag_dic_region
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
                 id,
@@ -60,7 +60,7 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.origin_return.DicRegion">
-        update t_dic_region
+        update uar_tag_dic_region
         <set>
             <if test="regionName != null">
                 region_name = #{regionName,jdbcType=VARCHAR},
@@ -72,7 +72,7 @@
         where id = #{id,jdbcType=INTEGER}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.origin_return.DicRegion">
-        update t_dic_region
+        update uar_tag_dic_region
         set region_name = #{regionName,jdbcType=VARCHAR},
         status = #{status,jdbcType=INTEGER}
         where id = #{id,jdbcType=INTEGER}

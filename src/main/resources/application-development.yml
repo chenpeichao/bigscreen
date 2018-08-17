@@ -22,12 +22,12 @@ weishu_pdmi:
     password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
 
-## 大屏接口数据返回值记录缓存库
+## 大屏接口数据返回值记录缓存库---包含uar_tag_dic_region和uar_origin_return_record表
 origin_return:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8
-    username: root
-    password: root
+    url: jdbc:mysql://10.10.32.62:3306/UAR_PROFILE?useUnicode=true&characterEncoding=utf8
+    username: uardev
+    password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
 
 

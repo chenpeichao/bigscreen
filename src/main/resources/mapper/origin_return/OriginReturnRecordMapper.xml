@@ -20,7 +20,7 @@
     <select id="findOriginReturnRecordByOriginId" resultType="java.lang.String" parameterType="java.util.Map">
         SELECT
         return_json
-        FROM t_origin_return_record torr
+        FROM uar_origin_return_record torr
         WHERE torr.origin_id = #{originId} AND torr.return_date = #{searchDate}
     </select>
 
@@ -30,21 +30,21 @@
         <include refid="Base_Column_List"/>
         ,
         <include refid="Blob_Column_List"/>
-        from t_origin_return_record
+        from uar_origin_return_record
         where id = #{id,jdbcType=INTEGER}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-        delete from t_origin_return_record
+        delete from uar_origin_return_record
         where id = #{id,jdbcType=INTEGER}
     </delete>
     <insert id="insert" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
-        insert into t_origin_return_record (id, origin_id, return_date,
+        insert into uar_origin_return_record (id, origin_id, return_date,
         return_json)
         values (#{id,jdbcType=INTEGER}, #{originId,jdbcType=VARCHAR}, #{returnDate,jdbcType=TIMESTAMP},
         #{returnJson,jdbcType=LONGVARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
-        insert into t_origin_return_record
+        insert into uar_origin_return_record
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
                 id,
@@ -75,7 +75,7 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
-        update t_origin_return_record
+        update uar_origin_return_record
         <set>
             <if test="originId != null">
                 origin_id = #{originId,jdbcType=VARCHAR},
@@ -90,14 +90,14 @@
         where id = #{id,jdbcType=INTEGER}
     </update>
     <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
-        update t_origin_return_record
+        update uar_origin_return_record
         set origin_id = #{originId,jdbcType=VARCHAR},
         return_date = #{returnDate,jdbcType=TIMESTAMP},
         return_json = #{returnJson,jdbcType=LONGVARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
-        update t_origin_return_record
+        update uar_origin_return_record
         set origin_id = #{originId,jdbcType=VARCHAR},
         return_date = #{returnDate,jdbcType=TIMESTAMP}
         where id = #{id,jdbcType=INTEGER}

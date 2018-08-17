@@ -18,9 +18,4 @@ import java.util.List;
 public interface UserAnalyseMapper extends ElasticsearchRepository<UserAnalyse, String> {
     @Query("{\"bool\" : {\"must\" : [{\"range\" : {\"tag_count\" : {\"gt\": \"0\"}}},{\"term\" : {\"age\" : \"?0\"}},{\"query_string\" : {\"default_field\" : \"user_tags.at\",\"query\" : \"at : ?1\"}}]}}")
     public List findByAtAndTagCountAndAge(String age, String at, Pageable pageable);
-
-    @Query("{ \"size\" : 0, \"query\" : [{\"range\" : {\"tag_count\" : {\"gt\": \"0\"}}},{\"term\" : {\"age\" : \"?0\"}},{\"query_string\" : {\"default_field\" : \"user_tags.at\",\"query\" : \"at : ？1\"}}] }")
-    public Long findByAtAndTagCountAndAgeCount(String age, String at);
-
-//    public Long countByAtLikeAndAgeAndTag_CountGreaterThan(String at, String age, Integer tagCount);
 }
