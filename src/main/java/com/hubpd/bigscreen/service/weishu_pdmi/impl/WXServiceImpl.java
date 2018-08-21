@@ -196,6 +196,13 @@ public class WXServiceImpl implements WXService {
             return resultMap;
         }
 
+        // 对于没有用户的机构id，返回空数据
+        if (pubAccountIdListByUserIdList == null || pubAccountIdListByUserIdList.size() == 0) {
+            resultMap.put("code", 0);
+            resultMap.put("data", new ArrayList<WXArticleAnalyseVO>());
+            return resultMap;
+        }
+
         try {
             // 3、根据公众号id列表，查询文章信息以及指定日期段的阅读数和点赞数
             List<WXArticleAnalyseVO> wxArticleAnalyseVOList = weiShuPdmiUserService.findgetWXArticleStatByAccountIdListAndSearchDate(pubAccountIdListByUserIdList, beginDateStr, endDateStr);
