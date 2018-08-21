@@ -198,7 +198,7 @@ public class WXServiceImpl implements WXService {
 
         // 对于没有用户的机构id，返回空数据
         if (pubAccountIdListByUserIdList == null || pubAccountIdListByUserIdList.size() == 0) {
-            resultMap.put("code", 0);
+            resultMap.put("code", 1);
             resultMap.put("data", new ArrayList<WXArticleAnalyseVO>());
             return resultMap;
         }
