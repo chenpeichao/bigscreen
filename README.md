@@ -1,3 +1,5 @@
+0、对外接口请求clientCode等信息生成语句；
+    INSERT INTO t_resource_client(CODE, NAME, secret_key, STATUS, remark) VALUE('shunyibigscreen', '顺义大屏','z3cEW81pToU4XwAC',1,'顺义大屏借口，调用微信、微博、用户分析(画像)');
 1、此种方式配置的多数据源下的@Transactional注解会生效
 2、微信运营分析：sql
     SELECT
