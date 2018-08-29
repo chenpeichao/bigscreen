@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.hubpd.bigscreen</groupId>
-    <artifactId>bigcreen</artifactId>
+    <artifactId>bigscreen</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>bigcreen</name>
-    <description>uar bigcreen</description>
+    <name>bigscreen</name>
+    <description>uar bigscreen</description>
 
     <properties>
         <!-- 默认跳过测试 -->
