@@ -55,7 +55,7 @@ public class WXController {
             searchDate = new Date();
         } else {
             try {
-                searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
+                searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr.trim());
                 //当查询时间大于当天系统时间，默认查询今天
                 if(searchDate.getTime() > System.currentTimeMillis()) {
                     searchDate =  new Date();
@@ -67,6 +67,9 @@ public class WXController {
                 return resultMap;
             }
         }
+
+        orginIdStr = orginIdStr.trim();
+        logger.info("微信运营接口调用，机构id为【" + orginIdStr + "】");
 
         try {
             return wxService.getWXUserAnalyse(orginIdStr, searchDate);
@@ -105,7 +108,7 @@ public class WXController {
             searchDate = new Date();
         } else {
             try {
-                searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
+                searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr.trim());
                 //当查询时间大于当天系统时间，默认查询今天
                 if(searchDate.getTime() > System.currentTimeMillis()) {
                     searchDate =  new Date();
@@ -117,6 +120,9 @@ public class WXController {
                 return resultMap;
             }
         }
+
+        orginIdStr = orginIdStr.trim();
+        logger.info("微信运营接口调用，机构id为【" + orginIdStr + "】");
 
         try {
             return wxService.getWXArticleList(orginIdStr, searchDate);

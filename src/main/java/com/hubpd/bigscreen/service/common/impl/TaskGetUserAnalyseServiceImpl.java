@@ -87,7 +87,7 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
         List<UserAnalyseVO> userAnalyseVOList = new ArrayList<UserAnalyseVO>();
 
         for (String appName : appaccountMap.keySet()) {
-            logger.info("应用【" + appName + "】查询-------------开始");
+            logger.info("应用【" + appName + "】用户分析查询-------------开始");
             UserAnalyseVO userAnalyseVO = new UserAnalyseVO();
             //根据应用名称，获取应用的appacount(即应用的at)
             List<String> appaccountList = appaccountMap.get(appName);
@@ -146,7 +146,7 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
                 });
                 userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
             }
-            logger.info("应用【" + appName + "】查询-------------结束");
+            logger.info("应用【" + appName + "】用户分析查询-------------结束");
             userAnalyseVO.setAppName(appName);
             userAnalyseVOList.add(userAnalyseVO);
         }
