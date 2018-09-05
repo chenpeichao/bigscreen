@@ -77,20 +77,12 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             return resultMap;
         }
 
-        // 根据机构id查询其下用户数据
-        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
-        if (uarBasicUserIdListByOrginId == null || uarBasicUserIdListByOrginId.size() == 0) {
-            logger.info("机构下没有对应的用户数据");
-            resultMap.put("code", 1);
-            resultMap.put("data", new ArrayList());
-            return resultMap;
-        }
-
         // 2、首先从mysql数据库中查询指定机构id的最新一条返回记录
-        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginIdAndLastDate(orginId);
-        if (originReturnRecordDB != null) {
+        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+//        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+        if (StringUtils.isNotBlank(originReturnRecordStr)) {
             resultMap.put("code", 1);
-            resultMap.put("data", StringUtils.isNotBlank(originReturnRecordDB.getReturnJson()) ? JSON.parse(originReturnRecordDB.getReturnJson()) : new ArrayList());
+            resultMap.put("data", JSON.parse(originReturnRecordStr));
             return resultMap;
         } else {
             // 当mysql中没有此机构id下的数据时
@@ -101,20 +93,13 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
                 // 当大屏机构表里存在此机构id对应信息，启动新线程执行接口调用
                 taskGetUserAnalyseService.getUserAnalyse(orginId);
                 resultMap.put("code", 0);
-                resultMap.put("message", "由于此机构之前数据未抓取，请1小时后再试！！");
+                resultMap.put("message", "由于此机构【" + currentDateStr + "】的数据未抓取，请1小时后再试！！");
                 return resultMap;
             } else {
-                // 当大屏机构表里不存在此机构id对应信息，先保存此机构id信息到大屏机构表，在启动新线程执行接口调用
-                taskGetUserAnalyseService.getUserAnalyse(orginId);
-                UarBasicTaskOrgin uarBasicTaskOrgin = new UarBasicTaskOrgin();
-                uarBasicTaskOrgin.setOrgId(orginId);
-                uarBasicTaskOrgin.setStatus(1);
-                uarBasicUserService.saveTaskOrgin(uarBasicTaskOrgin);
                 resultMap.put("code", 0);
-                resultMap.put("message", "由于之前未添加此机构，请1小时后再试！！");
+                resultMap.put("message", "未授权的机构id，请联系管理员授权！！");
                 return resultMap;
             }
-            //2、子线程调用任务，缓存数据
         }
     }
 

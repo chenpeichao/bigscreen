@@ -7,7 +7,9 @@ import com.hubpd.bigscreen.mapper.uar_profile.UserAnalyseMapper;
 import com.hubpd.bigscreen.service.common.TaskGetUserAnalyseService;
 import com.hubpd.bigscreen.service.origin_return.DicRegionService;
 import com.hubpd.bigscreen.service.origin_return.OriginReturnRecordService;
+import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
+import com.hubpd.bigscreen.service.uar_basic.impl.UarBasicAppinfoServiceImpl;
 import com.hubpd.bigscreen.utils.DateUtils;
 import com.hubpd.bigscreen.vo.UserAnalyseRegionVO;
 import com.hubpd.bigscreen.vo.UserAnalyseVO;
@@ -38,14 +40,14 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
     private Logger logger = Logger.getLogger(TaskGetUserAnalyseServiceImpl.class);
 
     @Autowired
-    private UarBasicUserService uarBasicUserService;
-    @Autowired
     private OriginReturnRecordService originReturnRecordService;
     @Autowired
     private DicRegionService dicRegionService;
 
     @Autowired
     private UserAnalyseMapper userAnalyseMapper;
+    @Autowired
+    private UarBasicAppinfoService uarBasicAppinfoService;
 
     @Autowired
     //es链接实体
@@ -68,15 +70,6 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
 
         String currentDateStr = DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd");
 
-        // 根据机构id查询其下用户数据
-        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginId);
-        if (uarBasicUserIdListByOrginId == null || uarBasicUserIdListByOrginId.size() == 0) {
-            logger.info("机构下没有对应的用户数据");
-            resultMap.put("code", 1);
-            resultMap.put("data", new ArrayList());
-            return resultMap;
-        }
-
         // 首先从mysql数据库中查询数据，如果有数据，则直接返回，没有则进行es计算返回，并保存查询天和机构的数据到mysql数据库缓存
         String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
         if (StringUtils.isNotBlank(originReturnRecordStr)) {
@@ -86,14 +79,15 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
         }
 
         // 根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
-        Map<String, List<String>> appaccountMap = uarBasicUserService.findAppaccountListByUserBasicUserIdList(uarBasicUserIdListByOrginId);
+        Map<String, List<String>> appaccountMap = uarBasicAppinfoService.findAppaccountListByOrgId(orginId);
 
         // 对于机构对应的用户以及公众号进行打印
-        logger.info("在【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginId + "】" + "对应用户id【" + uarBasicUserIdListByOrginId.toString() + "】，对应应用信息为【" + appaccountMap.toString() + "】");
+        logger.info("在【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginId + "】，对应应用信息为【" + appaccountMap.toString() + "】");
 
         List<UserAnalyseVO> userAnalyseVOList = new ArrayList<UserAnalyseVO>();
 
         for (String appName : appaccountMap.keySet()) {
+            logger.info("应用【" + appName + "】查询-------------开始");
             UserAnalyseVO userAnalyseVO = new UserAnalyseVO();
             //根据应用名称，获取应用的appacount(即应用的at)
             List<String> appaccountList = appaccountMap.get(appName);
@@ -152,6 +146,7 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
                 });
                 userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
             }
+            logger.info("应用【" + appName + "】查询-------------结束");
             userAnalyseVO.setAppName(appName);
             userAnalyseVOList.add(userAnalyseVO);
         }
@@ -188,23 +183,60 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
         builder.must(QueryBuilders.queryStringQuery("at : " + at));
         builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
 
+
 //        FieldSortBuilder sort = SortBuilders.fieldSort("age").order(SortOrder.DESC);
         //设置分页
         //====注意!es的分页和Hibernate一样api是从第0页开始的=========
-        PageRequest page = new PageRequest(0, 2);
-
+//        PageRequest page = new PageRequest(0, 2);
+//
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        //将搜索条件设置到构建中
-        nativeSearchQueryBuilder.withQuery(builder);
-        //将分页设置到构建中
-        nativeSearchQueryBuilder.withPageable(page);
+//        //将搜索条件设置到构建中
+//        nativeSearchQueryBuilder.withQuery(builder);
+//        //将分页设置到构建中
+//        nativeSearchQueryBuilder.withPageable(page);
 
         //将排序设置到构建中
 //        nativeSearchQueryBuilder.withSort(sort);
         //生产NativeSearchQuery
-        NativeSearchQuery query = nativeSearchQueryBuilder.build();
+        ;
+        NativeSearchQuery query = nativeSearchQueryBuilder.withFilter(builder).build();
+//        NativeSearchQuery query = nativeSearchQueryBuilder.build();
+
         //执行,返回包装结果的分页
         Page<UserAnalyse> resutlList = userAnalyseMapper.search(query);
         return resutlList.getTotalElements();
     }
+//    /**
+//     * 根据指定appkey以及指定字段查询es中的总数据量
+//     *
+//     * @param at         appkey应用标识
+//     * @param queryField 待查询es标识
+//     * @param queryParam 查询参数值
+//     * @return
+//     */
+//    public Long getTotalElements(String at, String queryField, String queryParam) {
+//        BoolQueryBuilder builder = QueryBuilders.boolQuery();
+//        builder.must(QueryBuilders.termQuery(queryField, queryParam));
+//        builder.must(QueryBuilders.queryStringQuery("at : " + at));
+//        builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
+//
+////        FieldSortBuilder sort = SortBuilders.fieldSort("age").order(SortOrder.DESC);
+//        //设置分页
+//        //====注意!es的分页和Hibernate一样api是从第0页开始的=========
+//        PageRequest page = new PageRequest(0, 2);
+//
+//        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+//        //将搜索条件设置到构建中
+//        nativeSearchQueryBuilder.withQuery(builder);
+//        //将分页设置到构建中
+//        nativeSearchQueryBuilder.withPageable(page);
+//
+//        //将排序设置到构建中
+////        nativeSearchQueryBuilder.withSort(sort);
+//        //生产NativeSearchQuery
+//        NativeSearchQuery query = nativeSearchQueryBuilder.build();
+//        //执行,返回包装结果的分页
+//        Page<UserAnalyse> resutlList = userAnalyseMapper.search(query);
+//        return resutlList.getTotalElements();
+//    }
 }

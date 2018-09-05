@@ -36,6 +36,15 @@
     <sql id="Blob_Column_List">
         contain_domain
     </sql>
+    <!-- 根据机构id，查询其下对应的所有网站和移动应用的appaccount -->
+    <select id="findAppaccountListByOrgId" resultType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo"
+            parameterType="java.lang.String">
+        SELECT ta.*
+        FROM t_appinfo ta
+        WHERE ta.appmedia = #{orgId,jdbcType=VARCHAR}
+    </select>
+
+
     <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
         select
         <include refid="Base_Column_List"/>
