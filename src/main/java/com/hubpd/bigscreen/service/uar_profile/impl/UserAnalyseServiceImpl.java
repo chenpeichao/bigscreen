@@ -77,12 +77,36 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             return resultMap;
         }
 
+//        // 2、首先从mysql数据库中查询指定机构id的最新一条返回记录
+//        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+//
+//        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginIdAndLastDate(orginId);
+//        if (StringUtils.isNotBlank(originReturnRecordStr)) {
+//            resultMap.put("code", 1);
+//            resultMap.put("data", JSON.parse(originReturnRecordStr));
+//            return resultMap;
+//        } else {
+//            // 当mysql中没有此机构id下的数据时
+//            //1、向机构id大屏缓存表里面添加此机构id，
+//            //1.1、首先查询机构id在大屏机构表里面有没有存储
+//            List<UarBasicTaskOrgin> taskOriginByOriginIdInBigscreenList = uarBasicUserService.findTaskOriginByOriginIdInBigscreen(orginId);
+//            if (taskOriginByOriginIdInBigscreenList != null && taskOriginByOriginIdInBigscreenList.size() > 0) {
+//                // 当大屏机构表里存在此机构id对应信息，启动新线程执行接口调用
+//                taskGetUserAnalyseService.getUserAnalyse(orginId);
+//                resultMap.put("code", 0);
+//                resultMap.put("message", "由于此机构【" + currentDateStr + "】的数据未抓取，请1小时后再试！！");
+//                return resultMap;
+//            } else {
+//                resultMap.put("code", 0);
+//                resultMap.put("message", "未授权的机构id，请联系管理员授权！！");
+//                return resultMap;
+//            }
+//        }
         // 2、首先从mysql数据库中查询指定机构id的最新一条返回记录
-        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
-//        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
-        if (StringUtils.isNotBlank(originReturnRecordStr)) {
+        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginIdAndLastDate(orginId);
+        if (originReturnRecordDB != null) {
             resultMap.put("code", 1);
-            resultMap.put("data", JSON.parse(originReturnRecordStr));
+            resultMap.put("data", JSON.parse(originReturnRecordDB.getReturnJson()));
             return resultMap;
         } else {
             // 当mysql中没有此机构id下的数据时
