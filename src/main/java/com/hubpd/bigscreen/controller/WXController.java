@@ -122,7 +122,7 @@ public class WXController {
         }
 
         orginIdStr = orginIdStr.trim();
-        logger.info("微信运营接口调用，机构id为【" + orginIdStr + "】");
+        logger.info("微信内容接口调用，机构id为【" + orginIdStr + "】");
 
         try {
             return wxService.getWXArticleList(orginIdStr, searchDate);

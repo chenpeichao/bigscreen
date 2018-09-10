@@ -1,7 +1,7 @@
 server:
   port: 8889
 
-## UAR_BASIC 数据源配置--用于获取指定机构下面的所有用户
+# UAR_BASIC 数据源配置--用于获取指定机构下面的所有用户
 uar_basic:
   datasource:
     url: jdbc:mysql://10.101.67.6:3306/UAR_BASIC?useUnicode=true&characterEncoding=utf8
@@ -9,7 +9,7 @@ uar_basic:
     password: uar!9&jdpQGd
     driverClassName: com.mysql.jdbc.Driver
 
-## weishu 数据源配置--用于获取微信相关数据
+# weishu 数据源配置--用于获取微信相关数据
 weishu_pdmi:
   datasource:
     url: jdbc:mysql://10.101.67.9:3306/pdmi?allowMultiQueries=true
@@ -17,7 +17,7 @@ weishu_pdmi:
     password: lvsijia
     driverClassName: com.mysql.jdbc.Driver
 
-## 大屏接口数据返回值记录缓存库---包含uar_tag_dic_region和uar_origin_return_record表
+# 大屏接口数据返回值记录缓存库---包含uar_tag_dic_region和uar_origin_return_record表
 origin_return:
   datasource:
     url: jdbc:mysql://10.101.67.6:3306/UAR_PROFILE?useUnicode=true&characterEncoding=utf8
@@ -29,6 +29,4 @@ spring:
      data:
         elasticsearch: #ElasticsearchProperties
             cluster-name: elasticsearch_uar
-            cluster-nodes: 10.101.67.4:9300,10.101.67.5:9300
-#            cluster-name: elasticsearch_testuar
-#            cluster-nodes: 10.10.32.58:9300
+            cluster-nodes: 10.101.67.4:9300
