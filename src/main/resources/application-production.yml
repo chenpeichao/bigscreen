@@ -25,6 +25,7 @@ origin_return:
     password: uar!9&jdpQGd
     driverClassName: com.mysql.jdbc.Driver
 
+# es画像生产环境库
 spring:
      data:
         elasticsearch: #ElasticsearchProperties

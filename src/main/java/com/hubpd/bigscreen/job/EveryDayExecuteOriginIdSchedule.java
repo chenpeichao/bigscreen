@@ -30,7 +30,7 @@ public class EveryDayExecuteOriginIdSchedule {
     @Autowired
     private TaskGetUserAnalyseService taskGetUserAnalyseService;
 
-    //        @Scheduled(fixedRate = 1000 * 60 * 250)
+    //            @Scheduled(fixedRate = 1000 * 60 * 250)
     @Scheduled(cron = "0 0 5 * * ?")
     public void addTask() {
         //查询大屏中缓存的所有有效的组织机构id列表

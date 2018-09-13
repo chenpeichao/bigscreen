@@ -30,7 +30,7 @@ origin_return:
     password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
 
-
+# es画像生产环境库
 spring:
      data:
         elasticsearch: #ElasticsearchProperties
