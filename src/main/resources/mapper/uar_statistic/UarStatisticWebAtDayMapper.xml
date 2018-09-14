@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_statistic.UarStatisticWebAtDayMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay">
+        <id column="at" property="at" jdbcType="VARCHAR"/>
+        <id column="day" property="day" jdbcType="INTEGER"/>
+        <result column="pv" property="pv" jdbcType="INTEGER"/>
+        <result column="uv" property="uv" jdbcType="INTEGER"/>
+        <result column="visit" property="visit" jdbcType="INTEGER"/>
+        <result column="visittime" property="visittime" jdbcType="REAL"/>
+        <result column="exit_visit" property="exitVisit" jdbcType="INTEGER"/>
+        <result column="visitcount" property="visitcount" jdbcType="REAL"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    at, day, pv, uv, visit, visittime, exit_visit, visitcount
+  </sql>
+    <!-- 根据at和时间查询统计信息 -->
+    <select id="selectPVAndUVByAtAndDate" resultMap="BaseResultMap" parameterType="java.util.Map">
+    select
+      *
+    from web_at_day
+    where at = #{at,jdbcType=VARCHAR} and day = #{day,jdbcType=INTEGER}
+  </select>
+
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap"
+            parameterType="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDayKey">
+        select
+        <include refid="Base_Column_List"/>
+        from web_at_day
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDayKey">
+    delete from web_at_day
+    where at = #{at,jdbcType=VARCHAR}
+      and day = #{day,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay">
+    insert into web_at_day (at, day, pv, 
+      uv, visit, visittime, 
+      exit_visit, visitcount)
+    values (#{at,jdbcType=VARCHAR}, #{day,jdbcType=INTEGER}, #{pv,jdbcType=INTEGER}, 
+      #{uv,jdbcType=INTEGER}, #{visit,jdbcType=INTEGER}, #{visittime,jdbcType=REAL}, 
+      #{exitVisit,jdbcType=INTEGER}, #{visitcount,jdbcType=REAL})
+  </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay">
+        insert into web_at_day
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="at != null">
+                at,
+            </if>
+            <if test="day != null">
+                day,
+            </if>
+            <if test="pv != null">
+                pv,
+            </if>
+            <if test="uv != null">
+                uv,
+            </if>
+            <if test="visit != null">
+                visit,
+            </if>
+            <if test="visittime != null">
+                visittime,
+            </if>
+            <if test="exitVisit != null">
+                exit_visit,
+            </if>
+            <if test="visitcount != null">
+                visitcount,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="at != null">
+                #{at,jdbcType=VARCHAR},
+            </if>
+            <if test="day != null">
+                #{day,jdbcType=INTEGER},
+            </if>
+            <if test="pv != null">
+                #{pv,jdbcType=INTEGER},
+            </if>
+            <if test="uv != null">
+                #{uv,jdbcType=INTEGER},
+            </if>
+            <if test="visit != null">
+                #{visit,jdbcType=INTEGER},
+            </if>
+            <if test="visittime != null">
+                #{visittime,jdbcType=REAL},
+            </if>
+            <if test="exitVisit != null">
+                #{exitVisit,jdbcType=INTEGER},
+            </if>
+            <if test="visitcount != null">
+                #{visitcount,jdbcType=REAL},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay">
+        update web_at_day
+        <set>
+            <if test="pv != null">
+                pv = #{pv,jdbcType=INTEGER},
+            </if>
+            <if test="uv != null">
+                uv = #{uv,jdbcType=INTEGER},
+            </if>
+            <if test="visit != null">
+                visit = #{visit,jdbcType=INTEGER},
+            </if>
+            <if test="visittime != null">
+                visittime = #{visittime,jdbcType=REAL},
+            </if>
+            <if test="exitVisit != null">
+                exit_visit = #{exitVisit,jdbcType=INTEGER},
+            </if>
+            <if test="visitcount != null">
+                visitcount = #{visitcount,jdbcType=REAL},
+            </if>
+        </set>
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay">
+    update web_at_day
+    set pv = #{pv,jdbcType=INTEGER},
+      uv = #{uv,jdbcType=INTEGER},
+      visit = #{visit,jdbcType=INTEGER},
+      visittime = #{visittime,jdbcType=REAL},
+      exit_visit = #{exitVisit,jdbcType=INTEGER},
+      visitcount = #{visitcount,jdbcType=REAL}
+    where at = #{at,jdbcType=VARCHAR}
+      and day = #{day,jdbcType=INTEGER}
+  </update>
+</mapper>
