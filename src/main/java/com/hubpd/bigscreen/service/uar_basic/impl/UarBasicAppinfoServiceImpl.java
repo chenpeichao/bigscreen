@@ -53,4 +53,14 @@ public class UarBasicAppinfoServiceImpl implements UarBasicAppinfoService {
         return result;
     }
 
+    /**
+     * 根据应用at，查询应用详情
+     *
+     * @param appaccount 应用at
+     * @return
+     */
+    public UarBasicAppinfo findAppInfoByAppAccountOrAppAccount2(String appaccount) {
+        return uarBasicAppinfoMapper.findAppInfoByAppAccountOrAppAccount2(appaccount);
+    }
+
 }

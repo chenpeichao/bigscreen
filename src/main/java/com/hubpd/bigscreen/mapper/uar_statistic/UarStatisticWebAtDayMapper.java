@@ -20,11 +20,20 @@ public interface UarStatisticWebAtDayMapper {
     int updateByPrimaryKey(UarStatisticWebAtDay record);
 
     /**
-     * 根据at和时间查询统计信息
+     * 根据at和时间查询统计信息--web
      *
      * @param appkey        应用appkey
      * @param searchDateStr 查询时间字符串
      * @return
      */
-    public UarStatisticWebAtDay selectPVAndUVByAtAndDate(Map<String, Object> params);
+    public UarStatisticWebAtDay selectPVAndUVByAtAndDateWeb(Map<String, Object> params);
+
+    /**
+     * 根据at和时间查询统计信息--app
+     *
+     * @param appkey        应用appkey
+     * @param searchDateStr 查询时间字符串
+     * @return
+     */
+    public UarStatisticWebAtDay selectPVAndUVByAtAndDateApp(Map<String, Object> params);
 }

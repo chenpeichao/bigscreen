@@ -5,7 +5,7 @@ import java.util.Date;
 public class UarBasicAppinfo {
     private Integer appid;
 
-    private Boolean apptype;
+    private Integer apptype;
 
     private String appsubtype;
 
@@ -55,11 +55,11 @@ public class UarBasicAppinfo {
         this.appid = appid;
     }
 
-    public Boolean getApptype() {
+    public Integer getApptype() {
         return apptype;
     }
 
-    public void setApptype(Boolean apptype) {
+    public void setApptype(Integer apptype) {
         this.apptype = apptype;
     }
 

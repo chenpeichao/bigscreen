@@ -37,6 +37,10 @@ public class Constants {
      * 根据uar机构id获取uar中appkey和media的对应关系
      */
     public static String PDMI_INTERFACE_URL_CRT_MEDIA_RELATION_BY_UAR_ORG_ID;
+    /**
+     * 获取crt中的数据标识(多个以英文字符分隔)：0：网站，2：app
+     */
+    public static String PDMI_INTERFACE_URL_CRT_APP_FLAG;
 
 
     /**
@@ -86,6 +90,11 @@ public class Constants {
     @Value("${pdmi_interface_url_crt_media_relation_by_uar_org_id}")
     public void setPdmiInterfaceUrlCrtMediaRelationByUarOrgId(String pdmiInterfaceUrlCrtMediaRelationByUarOrgId) {
         this.PDMI_INTERFACE_URL_CRT_MEDIA_RELATION_BY_UAR_ORG_ID = pdmiInterfaceUrlCrtMediaRelationByUarOrgId;
+    }
+
+    @Value("${pdmi_interface_url_crt_app_flag}")
+    public void setPdmiInterfaceUrlCrtAppFlag(String pdmiInterfaceUrlCrtAppFlag) {
+        this.PDMI_INTERFACE_URL_CRT_APP_FLAG = pdmiInterfaceUrlCrtAppFlag;
     }
 
     @Value("${client_code}")

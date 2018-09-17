@@ -43,6 +43,14 @@
         FROM t_appinfo ta
         WHERE ta.appmedia = #{orgId,jdbcType=VARCHAR}
     </select>
+    <!-- 根据应用at，查询应用详情 -->
+    <select id="findAppInfoByAppAccountOrAppAccount2" resultType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo"
+            parameterType="java.lang.String">
+        SELECT ta.* FROM t_appinfo ta
+        WHERE ta.appaccount = #{appaccount,jdbcType=VARCHAR}
+              OR
+              ta.appaccount2= #{appaccount,jdbcType=VARCHAR}
+    </select>
 
 
     <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">

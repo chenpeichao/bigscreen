@@ -1,5 +1,7 @@
 package com.hubpd.bigscreen.service.uar_basic;
 
+import com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo;
+
 import java.util.List;
 import java.util.Map;
 
@@ -17,4 +19,12 @@ public interface UarBasicAppinfoService {
      * @return
      */
     public Map<String, List<String>> findAppaccountListByOrgId(String orgId);
+
+    /**
+     * 根据应用at，查询应用详情
+     *
+     * @param appaccount 应用at
+     * @return
+     */
+    public UarBasicAppinfo findAppInfoByAppAccountOrAppAccount2(String appaccount);
 }

@@ -14,13 +14,20 @@
     <sql id="Base_Column_List">
     at, day, pv, uv, visit, visittime, exit_visit, visitcount
   </sql>
-    <!-- 根据at和时间查询统计信息 -->
-    <select id="selectPVAndUVByAtAndDate" resultMap="BaseResultMap" parameterType="java.util.Map">
-    select
-      *
-    from web_at_day
-    where at = #{at,jdbcType=VARCHAR} and day = #{day,jdbcType=INTEGER}
-  </select>
+    <!-- 根据at和时间查询统计信息-web -->
+    <select id="selectPVAndUVByAtAndDateWeb" resultMap="BaseResultMap" parameterType="java.util.Map">
+        select
+              *
+            from web_at_day
+        where at = #{at,jdbcType=VARCHAR} and day = #{day,jdbcType=INTEGER}
+    </select>
+    <!-- 根据at和时间查询统计信息-app -->
+    <select id="selectPVAndUVByAtAndDateApp" resultMap="BaseResultMap" parameterType="java.util.Map">
+        select
+              *
+            from app_at_day
+        where at = #{at,jdbcType=VARCHAR} and day = #{day,jdbcType=INTEGER}
+    </select>
 
 
     <select id="selectByPrimaryKey" resultMap="BaseResultMap"

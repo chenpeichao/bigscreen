@@ -27,4 +27,12 @@ public interface UarBasicAppinfoMapper {
      * @return
      */
     public List<UarBasicAppinfo> findAppaccountListByOrgId(String orgId);
+
+    /**
+     * 根据应用at，查询应用详情
+     *
+     * @param appaccount 应用at
+     * @return
+     */
+    public UarBasicAppinfo findAppInfoByAppAccountOrAppAccount2(String appaccount);
 }
