@@ -38,6 +38,16 @@ public class Constants {
      */
     public static String PDMI_INTERFACE_URL_CRT_MEDIA_RELATION_BY_UAR_ORG_ID;
 
+
+    /**
+     * 系统验证机构分配标识
+     */
+    public static String CLIENT_CODE;
+    /**
+     * 系统验证机构标识密钥
+     */
+    public static String SECRET_KEY;
+
     @Value("${data_back_begin_day_num}")
     public void setDataBackBeginDayNum(Integer dataBackBeginDayNum) {
         this.DATA_BACK_BEGIN_DAY_NUM = dataBackBeginDayNum;
@@ -77,4 +87,15 @@ public class Constants {
     public void setPdmiInterfaceUrlCrtMediaRelationByUarOrgId(String pdmiInterfaceUrlCrtMediaRelationByUarOrgId) {
         this.PDMI_INTERFACE_URL_CRT_MEDIA_RELATION_BY_UAR_ORG_ID = pdmiInterfaceUrlCrtMediaRelationByUarOrgId;
     }
+
+    @Value("${client_code}")
+    public void setClientCode(String clientCode) {
+        this.CLIENT_CODE = clientCode;
+    }
+
+    @Value("${secret_key}")
+    public void setSecretKey(String secretKey) {
+        this.SECRET_KEY = secretKey;
+    }
+
 }

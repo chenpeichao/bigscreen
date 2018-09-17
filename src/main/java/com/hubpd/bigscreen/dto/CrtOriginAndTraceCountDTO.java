@@ -1,4 +1,4 @@
-package com.hubpd.bigscreen;
+package com.hubpd.bigscreen.dto;
 
 import java.io.Serializable;
 

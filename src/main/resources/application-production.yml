@@ -25,6 +25,14 @@ origin_return:
     password: uar!9&jdpQGd
     driverClassName: com.mysql.jdbc.Driver
 
+# UAR_STATISTIC 数据源配置--用于获取指定应用下的pv、uv
+uar_statistic:
+  datasource:
+    url: jdbc:mysql://10.101.67.6:3306/UAR_STATISTIC?useUnicode=true&characterEncoding=utf8
+    username: uardev
+    password: uardev2017
+    driverClassName: com.mysql.jdbc.Driver
+
 # es画像生产环境库
 spring:
      data:

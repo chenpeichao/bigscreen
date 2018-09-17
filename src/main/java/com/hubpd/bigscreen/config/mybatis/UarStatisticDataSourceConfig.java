@@ -15,32 +15,32 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import javax.sql.DataSource;
 
 /**
- * 第一个数据源---主要的数据源
- * Created by ceek on 2018-08-08 21:50.
- */
+ * 第三个数据源
+ *
+ * @create 2018-09-17 16:32
+ **/
 @Configuration
 // 扫描 Mapper 接口并容器管理
-@MapperScan(basePackages = WeishuPdmiDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "weishuPdmiSqlSessionFactory")
-public class WeishuPdmiDataSourceConfig {
+@MapperScan(basePackages = UarStatisticDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "uarStatisticSqlSessionFactory")
+public class UarStatisticDataSourceConfig {
     // 精确到 master 目录，以便跟其他数据源隔离
-    static final String PACKAGE = "com.hubpd.bigscreen.mapper.weishu_pdmi";
-    static final String MAPPER_LOCATION = "classpath:mapper/weishu_pdmi/*.xml";
+    static final String PACKAGE = "com.hubpd.bigscreen.mapper.uar_statistic";
+    static final String MAPPER_LOCATION = "classpath:mapper/uar_statistic/*.xml";
 
-    @Value("${weishu_pdmi.datasource.url}")
+    @Value("${uar_statistic.datasource.url}")
     private String url;
 
-    @Value("${weishu_pdmi.datasource.username}")
+    @Value("${uar_statistic.datasource.username}")
     private String user;
 
-    @Value("${weishu_pdmi.datasource.password}")
+    @Value("${uar_statistic.datasource.password}")
     private String password;
 
-    @Value("${weishu_pdmi.datasource.driverClassName}")
+    @Value("${uar_statistic.datasource.driverClassName}")
     private String driverClass;
 
-    @Bean(name = "weishuPdmiDataSource")
-    @Primary
-    public DataSource weishuPdmiDataSource() {
+    @Bean(name = "uarStatisticDataSource")
+    public DataSource uarStatisticDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setDriverClassName(driverClass);
         dataSource.setUrl(url);
@@ -49,20 +49,18 @@ public class WeishuPdmiDataSourceConfig {
         return dataSource;
     }
 
-    @Bean(name = "weishuPdmiTransactionManager")
-    @Primary
-    public DataSourceTransactionManager weishuPdmiTransactionManager() {
-        return new DataSourceTransactionManager(weishuPdmiDataSource());
+    @Bean(name = "uarStatisticTransactionManager")
+    public DataSourceTransactionManager uarStatisticTransactionManager() {
+        return new DataSourceTransactionManager(uarStatisticDataSource());
     }
 
-    @Bean(name = "weishuPdmiSqlSessionFactory")
-    @Primary
-    public SqlSessionFactory weishuPdmiSqlSessionFactory(@Qualifier("weishuPdmiDataSource") DataSource weishuPdmiDataSource)
+    @Bean(name = "uarStatisticSqlSessionFactory")
+    public SqlSessionFactory uarStatisticSqlSessionFactory(@Qualifier("uarStatisticDataSource") DataSource uarStatisticDataSource)
             throws Exception {
         final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
-        sessionFactory.setDataSource(weishuPdmiDataSource);
+        sessionFactory.setDataSource(uarStatisticDataSource);
         sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver()
-                .getResources(WeishuPdmiDataSourceConfig.MAPPER_LOCATION));
+                .getResources(UarStatisticDataSourceConfig.MAPPER_LOCATION));
         return sessionFactory.getObject();
     }
 }
