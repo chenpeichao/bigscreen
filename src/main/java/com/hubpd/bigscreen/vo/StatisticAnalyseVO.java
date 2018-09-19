@@ -12,8 +12,8 @@ public class StatisticAnalyseVO implements Serializable {
     private String appName;         //应用名称
     private Long pv = 0L;           //
     private Long uv = 0L;           //
-    private Long originCount;       //原创数
-    private Long tracedCount;       //转载数
+    private Long originCount = 0L;       //原创数
+    private Long tracedCount = 0L;       //转载数
 
 
     public String getAppName() {

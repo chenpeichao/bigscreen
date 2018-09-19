@@ -1,7 +1,6 @@
 package com.hubpd.bigscreen.service.statistic_analyse.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo;
 import com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay;
@@ -13,30 +12,15 @@ import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
+import com.hubpd.bigscreen.utils.HttpUtils;
 import com.hubpd.bigscreen.utils.Md5Utils;
 import com.hubpd.bigscreen.vo.StatisticAnalyseTmpVO;
 import com.hubpd.bigscreen.vo.StatisticAnalyseVO;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -70,6 +54,8 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
 
         String searchDateStr = DateUtils.getDateStrByDate(searchDate, "yyyyMMdd");
 
+        Date currentDate = new Date();
+
         //1、首先查询传递的机构id，是否在uar中是有效的机构id
         List<String> allOriginIdListInUar = uarBasicUserService.findAllOriginIdListInUar();
         if (!allOriginIdListInUar.contains(orginIdStr)) {
@@ -82,7 +68,7 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         // 1、根据用户id列表，查询用户下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
         Map<String, List<String>> appaccountMap = uarBasicAppinfoService.findAppaccountListByOrgId(orginIdStr);
         // 对于机构对应的用户以及公众号进行打印
-        logger.info("在【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginIdStr + "】，对应应用信息为【" + appaccountMap.toString() + "】");
+        logger.info("在【" + DateUtils.getDateStrByDate(currentDate, "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginIdStr + "】，对应应用信息为【" + appaccountMap.toString() + "】");
 
         List<StatisticAnalyseTmpVO> statisticAnalyseTmpVOList = new ArrayList<StatisticAnalyseTmpVO>();
 
@@ -99,8 +85,9 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
                 //首先判断该appaccount是否为移动应用的，如果是，则调用app_at_day获取，否则则通过web_at_day获取数据
                 UarBasicAppinfo uarBasicAppinfo = uarBasicAppinfoService.findAppInfoByAppAccountOrAppAccount2(appaccount);
                 UarStatisticWebAtDay uarStatisticWebAtDay = new UarStatisticWebAtDay();
-                if (uarBasicAppinfo.getApptype() != null && uarBasicAppinfo.getApptype() == 2) {
-                    //为移动应用
+                //由于移动应用和网站的数据来自不同的表，所以需要判断
+                if (uarBasicAppinfo.getApptype() != null && uarBasicAppinfo.getApptype() == Constants.UAR_APP_TYPE_APP) {
+                    //此为移动应用
                     uarStatisticWebAtDay = this.selectPVAndUVByAtAndDateApp(appaccount, searchDateStr);
                 } else {
                     //此为网站
@@ -120,30 +107,24 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         String crtAdminId = "";         //crt机构id
         String getCrtAdminIdByUarOrgIdUrl = Constants.PDMI_INTERFACE_HOST + Constants.PDMI_INTERFACE_URL_GET_ADMIN_ID_BY_UAR_ORG_ID + "?" + "uar=" + orginIdStr;
         logger.info("调用【获取uar和crt机构id对应关系】接口：" + getCrtAdminIdByUarOrgIdUrl);
-        String returnJsonGetCrtAdminIdByUarOrgIdUrl = this.doGet(getCrtAdminIdByUarOrgIdUrl);
+        String returnJsonGetCrtAdminIdByUarOrgIdUrl = HttpUtils.doGet(getCrtAdminIdByUarOrgIdUrl);
         if (StringUtils.isNotBlank(returnJsonGetCrtAdminIdByUarOrgIdUrl)) {
             Map<String, String> parseGetCrtAdminIdByUarOrgIdUrl = (Map<String, String>) JSON.parse(returnJsonGetCrtAdminIdByUarOrgIdUrl);
             //获取到crt的机构id
             crtAdminId = parseGetCrtAdminIdByUarOrgIdUrl.get("crt");
         } else {
             logger.info("用户调用的机构id【" + orginIdStr + "】未获取到crt端的机构id---first");
-            resultMap.put("code", 0);
-            resultMap.put("message", "获取数据异常，请稍后再试！！！");
-            return resultMap;
         }
 
         //2、根据crt机构id，获取uar的appkey和crt的mediaId的对应关系数据
         List<UarAppkeyAndCrtMediaIdDTO> uarAppkeyAndCrtMediaIdDTOList = new ArrayList<UarAppkeyAndCrtMediaIdDTO>();
         String getAppKeyAndMediaIdRelationUrl = Constants.PDMI_INTERFACE_HOST + Constants.PDMI_INTERFACE_URL_CRT_MEDIA_RELATION_BY_UAR_ORG_ID + "?" + "uar=" + orginIdStr;
         logger.info("调用【获取uar的appkey和crt的mediaId对应关系】接口：" + getAppKeyAndMediaIdRelationUrl);
-        String returnJsonGetAppKeyAndMediaIdRelationUrl = this.doGet(getAppKeyAndMediaIdRelationUrl);
+        String returnJsonGetAppKeyAndMediaIdRelationUrl = HttpUtils.doGet(getAppKeyAndMediaIdRelationUrl);
         if (StringUtils.isNotBlank(returnJsonGetAppKeyAndMediaIdRelationUrl)) {
             uarAppkeyAndCrtMediaIdDTOList = JSON.parseArray(returnJsonGetAppKeyAndMediaIdRelationUrl, UarAppkeyAndCrtMediaIdDTO.class);
         } else {
-            logger.info("用户调用的机构id【" + orginIdStr + "】未获取到crt端的机构id---second");
-            resultMap.put("code", 0);
-            resultMap.put("message", "获取数据异常，请稍后再试！！！");
-            return resultMap;
+            logger.info("用户调用的机构id【" + orginIdStr + "】未获取到crt端的mediaId与uar端的appkey对应关系---second");
         }
 
         //3、根据crt机构id，查询网站和app的相关原创和转载数据
@@ -155,13 +136,14 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
             jsonObject.put("secretCode", Md5Utils.getMD5OfStr(Constants.CLIENT_CODE + Constants.SECRET_KEY + timesMillis));
             jsonObject.put("timesMillis", "" + timesMillis);
             jsonObject.put("adminId", crtAdminId);
+            jsonObject.put("date", DateUtils.getDateStrByDate(searchDate, "yyyy-MM-dd"));
             if (StringUtils.isNotBlank(Constants.PDMI_INTERFACE_URL_CRT_APP_FLAG)) {
                 String[] split = Constants.PDMI_INTERFACE_URL_CRT_APP_FLAG.split(",");
                 for (String crtAppFlag : split) {
                     jsonObject.put("mediaType", crtAppFlag);
                     logger.info("调用【获取根据crt机构id获取原创/转载数据】接口：" + Constants.PDMI_INTERFACE_HOST + Constants.PDMI_INTERFACE_URL_GET_CRT_INFO_BY_ADMIN_ID_AND_MEDIA_TYPE + "【请求参数为" + jsonObject.toString() + "】");
                     try {
-                        String result = doPost(jsonObject, Constants.PDMI_INTERFACE_HOST + Constants.PDMI_INTERFACE_URL_GET_CRT_INFO_BY_ADMIN_ID_AND_MEDIA_TYPE);
+                        String result = HttpUtils.doFormPost(jsonObject, Constants.PDMI_INTERFACE_HOST + Constants.PDMI_INTERFACE_URL_GET_CRT_INFO_BY_ADMIN_ID_AND_MEDIA_TYPE);
                         if (StringUtils.isNotBlank(result)) {
                             String returnCrtDataJsonArray = JSONObject.parseObject(result).get("data").toString();
                             List<CrtOriginAndTraceCountDTO> crtOriginAndTraceCountDTOs = JSONObject.parseArray(returnCrtDataJsonArray, CrtOriginAndTraceCountDTO.class);
@@ -175,10 +157,7 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
                 }
             }
         } else {
-            logger.info("获取crt机构id失败，未获取到crt和uar的appkey和mediaId的对应关系");
-            resultMap.put("code", 0);
-            resultMap.put("message", "获取数据异常，请稍后再试！！！");
-            return resultMap;
+            logger.info("由于未获取到crt和uar的appkey和mediaId的对应关系，所以无crt端的原创数和转载数！");
         }
 
         //4、数据封装--对之前产生的临时pv、uv数据整合crt的原创/转载数据进行整合
@@ -186,7 +165,11 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         for (StatisticAnalyseTmpVO statisticAnalyseTmpVO : statisticAnalyseTmpVOList) {
             //前台接口数据显示vo
             StatisticAnalyseVO statisticAnalyseVO = new StatisticAnalyseVO();
-
+            //uar中pv和uv接口返回数据格式封装
+            statisticAnalyseVO.setAppName(statisticAnalyseTmpVO.getAppName());
+            statisticAnalyseVO.setPv(statisticAnalyseTmpVO.getPv());
+            statisticAnalyseVO.setUv(statisticAnalyseTmpVO.getUv());
+            //对crt中的原创数和转载数进行封装
             for (UarAppkeyAndCrtMediaIdDTO uarAppkeyAndCrtMediaIdDTO : uarAppkeyAndCrtMediaIdDTOList) {
                 if (statisticAnalyseTmpVO.getUarAppkey().equals(uarAppkeyAndCrtMediaIdDTO.getUarMedia())) {
                     statisticAnalyseTmpVO.setCrtMediaId(uarAppkeyAndCrtMediaIdDTO.getCrtMedia());
@@ -195,89 +178,19 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
                             statisticAnalyseTmpVO.setOriginCount(crtOriginAndTraceCountDTO.getOriginCount());
                             statisticAnalyseTmpVO.setTracedCount(crtOriginAndTraceCountDTO.getTracedCount());
 
-                            //接口返回数据格式封装
-                            statisticAnalyseVO.setAppName(statisticAnalyseTmpVO.getAppName());
-                            statisticAnalyseVO.setPv(statisticAnalyseTmpVO.getPv());
-                            statisticAnalyseVO.setUv(statisticAnalyseTmpVO.getUv());
                             statisticAnalyseVO.setOriginCount(statisticAnalyseTmpVO.getOriginCount());
                             statisticAnalyseVO.setTracedCount(statisticAnalyseTmpVO.getTracedCount());
-                            statisticAnalyseVOList.add(statisticAnalyseVO);
                         }
                     }
                 }
             }
+            statisticAnalyseVOList.add(statisticAnalyseVO);
         }
 
         resultMap.put("code", 1);
         resultMap.put("data", statisticAnalyseVOList);
         resultMap.put("dataResponseTime", new SimpleDateFormat("yyyy-MM-dd").format(searchDate));
         return resultMap;
-    }
-
-    public String doGet(String url) {
-        CloseableHttpClient httpCilent2 = HttpClients.createDefault();
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(20000)   //设置连接超时时间
-                .setConnectionRequestTimeout(20000) // 设置请求超时时间
-                .setSocketTimeout(20000)
-                .setRedirectsEnabled(true)//默认允许自动重定向
-                .build();
-        HttpGet httpGet = new HttpGet(url);
-        httpGet.setConfig(requestConfig);
-        String resultJson = null;
-        try {
-            HttpResponse httpResponse = httpCilent2.execute(httpGet);
-            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                resultJson = EntityUtils.toString(httpResponse.getEntity());//获得返回的结果
-            }
-        } catch (IOException e) {
-            logger.error("调用请求失败【" + url + "】", e);
-        } finally {
-            try {
-                httpCilent2.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return resultJson;
-        }
-    }
-
-    /**
-     * post请求（用于请求表单格式的参数）
-     *
-     * @param paramsMap
-     * @param url
-     * @return
-     */
-    private String doPost(Map<String, String> paramsMap, String url) {
-        HttpClient httpclient = (HttpClient) HttpClients.createDefault(); //获取链接对象.
-        HttpPost httpPost = new HttpPost(url); //创建表单.
-        ArrayList<BasicNameValuePair> pairs = new ArrayList<BasicNameValuePair>();//用于存放表单数据.
-
-        //遍历map 将其中的数据转化为表单数据
-        for (Map.Entry<String, String> entry : paramsMap.entrySet()) {
-            pairs.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-        }
-
-        String jsonString = null;
-        //对表单数据进行url编码
-        try {
-            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(pairs);
-            httpPost.setEntity(urlEncodedFormEntity);
-            HttpResponse response = httpclient.execute(httpPost);
-            StatusLine status = response.getStatusLine();
-            int state = status.getStatusCode();
-            if (state == HttpStatus.SC_OK) {
-                HttpEntity responseEntity = response.getEntity();
-                jsonString = EntityUtils.toString(responseEntity);
-            } else {
-                logger.info("请求返回:" + state + "(" + url + ")");
-            }
-        } catch (Exception e) {
-            logger.error("调用请求失败【" + url + "】", e);
-        } finally {
-            return jsonString;
-        }
     }
 
     /**

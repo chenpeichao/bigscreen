@@ -1,5 +1,7 @@
 package com.hubpd.bigscreen.utils;
 
+import com.sun.xml.internal.ws.util.UtilException;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -38,5 +40,27 @@ public class DateUtils {
     public static String getDateStrByDate(Date date, String pattern) {
         String formatDateStr = new SimpleDateFormat(pattern).format(date);
         return formatDateStr;
+    }
+
+    /**
+     * 得到两个日期相隔天数
+     *
+     * @param firstDate  第一个时间
+     * @param secondDate 第二个时间
+     * @return
+     */
+    public static long getNumByTwoDate(Date firstDate, Date secondDate) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            long firstTime = df.parse(df.format(firstDate)).getTime();
+            long secondTime = df.parse(df.format(secondDate)).getTime();
+            if (firstTime >= secondTime) {
+                return (firstTime - secondTime) / (1000 * 60 * 60 * 24);
+            } else {
+                return (secondTime - firstTime) / (1000 * 60 * 60 * 24);
+            }
+        } catch (Exception e) {
+            throw new UtilException(e);
+        }
     }
 }

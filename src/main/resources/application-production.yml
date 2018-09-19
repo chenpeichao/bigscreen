@@ -35,7 +35,7 @@ uar_statistic:
 
 # es画像生产环境库
 spring:
-     data:
-        elasticsearch: #ElasticsearchProperties
-            cluster-name: elasticsearch_uar
-            cluster-nodes: 10.101.67.4:9300
+  data:
+    elasticsearch: #ElasticsearchProperties
+      cluster-name: elasticsearch_uar
+      cluster-nodes: 10.101.67.4:9300
