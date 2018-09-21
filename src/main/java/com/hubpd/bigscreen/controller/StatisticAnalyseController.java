@@ -80,6 +80,8 @@ public class StatisticAnalyseController {
                 resultMap.put("message", "日期格式错误！【yyyy-MM-dd】");
                 return resultMap;
             }
+        } else {
+            searchDate = DateUtils.addDays(currentDate, -1);
         }
 
 
