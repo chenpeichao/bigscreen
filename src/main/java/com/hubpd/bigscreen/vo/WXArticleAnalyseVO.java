@@ -15,6 +15,7 @@ public class WXArticleAnalyseVO {
     private Integer likeNum;        //点赞数
     private String wxNo;            //微信号
     private String wxName;          //微信名称
+    private String publishTime;          //文章发布时间
 
     public Integer getArticleId() {
         return articleId;
@@ -80,6 +81,14 @@ public class WXArticleAnalyseVO {
         this.wxName = wxName;
     }
 
+    public String getPublishTime() {
+        return publishTime;
+    }
+
+    public void setPublishTime(String publishTime) {
+        this.publishTime = publishTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,7 +103,8 @@ public class WXArticleAnalyseVO {
         if (readNum != null ? !readNum.equals(that.readNum) : that.readNum != null) return false;
         if (likeNum != null ? !likeNum.equals(that.likeNum) : that.likeNum != null) return false;
         if (wxNo != null ? !wxNo.equals(that.wxNo) : that.wxNo != null) return false;
-        return wxName != null ? wxName.equals(that.wxName) : that.wxName == null;
+        if (wxName != null ? !wxName.equals(that.wxName) : that.wxName != null) return false;
+        return publishTime != null ? publishTime.equals(that.publishTime) : that.publishTime == null;
 
     }
 
@@ -108,6 +118,7 @@ public class WXArticleAnalyseVO {
         result = 31 * result + (likeNum != null ? likeNum.hashCode() : 0);
         result = 31 * result + (wxNo != null ? wxNo.hashCode() : 0);
         result = 31 * result + (wxName != null ? wxName.hashCode() : 0);
+        result = 31 * result + (publishTime != null ? publishTime.hashCode() : 0);
         return result;
     }
 
@@ -117,11 +128,12 @@ public class WXArticleAnalyseVO {
                 "articleId=" + articleId +
                 ", articleTitle='" + articleTitle + '\'' +
                 ", articleUrl='" + articleUrl + '\'' +
-                ", dateTime=" + dateTime +
+                ", dateTime='" + dateTime + '\'' +
                 ", readNum=" + readNum +
                 ", likeNum=" + likeNum +
                 ", wxNo='" + wxNo + '\'' +
                 ", wxName='" + wxName + '\'' +
+                ", publishTime='" + publishTime + '\'' +
                 '}';
     }
 }

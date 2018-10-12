@@ -21,7 +21,8 @@
       tas.total_read_num AS 'readNum',
       tas.total_like_num AS 'likeNum',
       tpa.wx_id AS 'wxNo',
-      tpa.wx_name AS 'wxName'
+      tpa.wx_name AS 'wxName',
+      left(ta.publish_time, 19) AS 'publishTime'
     FROM t_article_stat tas
       LEFT JOIN t_article ta
       ON tas.article_id = ta.id
