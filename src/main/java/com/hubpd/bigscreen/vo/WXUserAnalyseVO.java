@@ -13,6 +13,7 @@ public class WXUserAnalyseVO {
     private Integer cancelFollowNum = 0;            //取消关注人数
     private Integer realIncreaseFollowNum = 0;      //净增关注人数
     private Long likeNum = 0l;                       //点赞总数
+    private Long readNum = 0l;                       //阅读总数
 
     public String getWxNo() {
         return wxNo;
@@ -78,6 +79,14 @@ public class WXUserAnalyseVO {
         this.likeNum = likeNum;
     }
 
+    public Long getReadNum() {
+        return readNum;
+    }
+
+    public void setReadNum(Long readNum) {
+        this.readNum = readNum;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -95,7 +104,8 @@ public class WXUserAnalyseVO {
             return false;
         if (realIncreaseFollowNum != null ? !realIncreaseFollowNum.equals(that.realIncreaseFollowNum) : that.realIncreaseFollowNum != null)
             return false;
-        return likeNum != null ? likeNum.equals(that.likeNum) : that.likeNum == null;
+        if (likeNum != null ? !likeNum.equals(that.likeNum) : that.likeNum != null) return false;
+        return readNum != null ? readNum.equals(that.readNum) : that.readNum == null;
 
     }
 
@@ -109,6 +119,7 @@ public class WXUserAnalyseVO {
         result = 31 * result + (cancelFollowNum != null ? cancelFollowNum.hashCode() : 0);
         result = 31 * result + (realIncreaseFollowNum != null ? realIncreaseFollowNum.hashCode() : 0);
         result = 31 * result + (likeNum != null ? likeNum.hashCode() : 0);
+        result = 31 * result + (readNum != null ? readNum.hashCode() : 0);
         return result;
     }
 
@@ -123,6 +134,7 @@ public class WXUserAnalyseVO {
                 ", cancelFollowNum=" + cancelFollowNum +
                 ", realIncreaseFollowNum=" + realIncreaseFollowNum +
                 ", likeNum=" + likeNum +
+                ", readNum=" + readNum +
                 '}';
     }
 }

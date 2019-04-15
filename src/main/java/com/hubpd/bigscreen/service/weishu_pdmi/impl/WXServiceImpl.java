@@ -129,6 +129,7 @@ public class WXServiceImpl implements WXService {
                     WXUserAnalyseVO wxUserAnalyseVOFromMap = installMap.get(wxUserAnalyseVO.getWxNo() + "_" + wxUserAnalyseVO.getDateTime());
                     if(wxUserAnalyseVOFromMap != null) {
                         wxUserAnalyseVOFromMap.setLikeNum(wxUserAnalyseVO.getLikeNum());
+                        wxUserAnalyseVOFromMap.setReadNum(wxUserAnalyseVO.getReadNum());
                     }
                 }
             }

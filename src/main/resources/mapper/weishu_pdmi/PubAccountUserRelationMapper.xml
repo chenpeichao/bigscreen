@@ -193,7 +193,8 @@
       tas.ref_date AS 'dateTime',
       tpa.wx_id AS 'wxNo',
       tpa.wx_name AS 'wxName',
-    IFNULL(SUM(tas.total_like_num),0) AS 'likeNum'
+    IFNULL(SUM(tas.total_like_num),0) AS 'likeNum',
+    IFNULL(SUM(tas.total_read_num),0) AS 'readNum'
     FROM t_article_stat_day tas LEFT JOIN t_pub_account tpa ON tas.pub_account_id = tpa.id
     <where>
       <if test="beginDateStr !=null and beginDateStr != ''">
