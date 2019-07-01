@@ -4,6 +4,7 @@ import com.hubpd.bigscreen.service.common.TaskGetUserAnalyseService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
 import com.hubpd.bigscreen.service.uar_profile.impl.UserAnalyseServiceImpl;
+import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class EveryDayExecuteOriginIdSchedule {
     @Autowired
     private TaskGetUserAnalyseService taskGetUserAnalyseService;
 
-    //            @Scheduled(fixedRate = 1000 * 60 * 250)
+    //    @Scheduled(fixedRate = 1000 * 60 * 250)
     @Scheduled(cron = "0 0 5 * * ?")
     public void addTask() {
         //查询大屏中缓存的所有有效的组织机构id列表
@@ -41,8 +42,9 @@ public class EveryDayExecuteOriginIdSchedule {
         for (String originId : allOriginIdList) {
             // 对用户分析接口进行调用，目的为了缓存当天接口返回值到mysql数据库
             try {
-                Map<String, Object> userAnalyse = taskGetUserAnalyseService.getUserAnalyse(originId);
-                if (userAnalyse != null) {
+                Map<String, Object> userAnalyseES = taskGetUserAnalyseService.getUserAnalyse(originId, Constants.USER_PROFILE_REGIN_DATA_LEVEL_ES);
+                Map<String, Object> userAnalyseMysql = taskGetUserAnalyseService.getUserAnalyse(originId, Constants.USER_PROFILE_REGIN_DATA_LEVEL_MYSQL);
+                if (userAnalyseES != null) {
                     logger.info("缓存根据机构id【" + originId + "】用户分析指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");
                 }
             } catch (Exception e) {

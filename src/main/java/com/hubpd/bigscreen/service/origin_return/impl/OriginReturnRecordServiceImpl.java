@@ -59,6 +59,52 @@ public class OriginReturnRecordServiceImpl implements OriginReturnRecordService 
     }
 
     /**
+     * 根据机构id和查询时间，查询接口返回值
+     *
+     * @param originId   机构id
+     * @param searchDate 查询时间
+     * @return
+     */
+    public String findOriginReturnRecordByOriginIdDataLevel(String originId, String searchDate, Integer dataLevel) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("originId", originId);
+        params.put("searchDate", searchDate);
+        params.put("dataLevel", dataLevel);
+        List<String> originReturnRecordByOriginIdList = originReturnRecordMapper.findOriginReturnRecordByOriginIdAndDataLevel(params);
+        if (originReturnRecordByOriginIdList != null && originReturnRecordByOriginIdList.size() > 0) {
+            if (originReturnRecordByOriginIdList.size() > 1) {
+                logger.error("机构id【" + originId + "】在接口缓存数据库中保存的接口返回信息保存记录错误，记录数大于1条");
+            }
+            return originReturnRecordByOriginIdList.get(0);
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * 根据机构id和查询时间，查询接口返回值
+     *
+     * @param originId   机构id
+     * @param searchDate 查询时间
+     * @return
+     */
+    public String findOriginReturnRecordByOriginIdAndDataLevel(String originId, String searchDate, Integer dataLevel) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("originId", originId);
+        params.put("searchDate", searchDate);
+        params.put("dataLevel", dataLevel);
+        List<String> originReturnRecordByOriginIdList = originReturnRecordMapper.findOriginReturnRecordByOriginIdAndDataLevel(params);
+        if (originReturnRecordByOriginIdList != null && originReturnRecordByOriginIdList.size() > 0) {
+            if (originReturnRecordByOriginIdList.size() > 1) {
+                logger.error("机构id【" + originId + "】在接口缓存数据库中保存的接口返回信息保存记录错误，记录数大于1条");
+            }
+            return originReturnRecordByOriginIdList.get(0);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * 查询指定机构id的最新一条返回记录
      *
      * @param originId 机构id
@@ -66,5 +112,19 @@ public class OriginReturnRecordServiceImpl implements OriginReturnRecordService 
      */
     public OriginReturnRecord findOriginReturnRecordByOriginIdAndLastDate(String originId) {
         return originReturnRecordMapper.findOriginReturnRecordByOriginIdAndLastDate(originId);
+    }
+
+    /**
+     * 查询指定机构id的最新一条返回记录
+     *
+     * @param originId  机构id
+     * @param dataLevel 数据来源(1:mysql;2:画像es)
+     * @return
+     */
+    public OriginReturnRecord findOriginReturnRecordByOriginIdAndLastDateAndDataLevel(String originId, Integer dataLevel) {
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("originId", originId);
+        paramMap.put("dataLevel", dataLevel);
+        return originReturnRecordMapper.findOriginReturnRecordByOriginIdAndLastDateAndDataLevel(paramMap);
     }
 }

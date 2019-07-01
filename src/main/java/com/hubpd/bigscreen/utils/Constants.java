@@ -49,7 +49,15 @@ public class Constants {
     public static Integer UAR_APP_TYPE_APP;
 
 
-
+    /** 用户画像地域数据来源 */
+    /**
+     * 来自es
+     */
+    public static Integer USER_PROFILE_REGIN_DATA_LEVEL_ES;
+    /**
+     * 来自mysql
+     */
+    public static Integer USER_PROFILE_REGIN_DATA_LEVEL_MYSQL;
 
     @Value("${data_back_begin_day_num}")
     public void setDataBackBeginDayNum(Integer dataBackBeginDayNum) {
@@ -114,6 +122,16 @@ public class Constants {
     @Value("${uar_app_type_app}")
     public void setUarAppTypeApp(Integer uarAppTypeApp) {
         this.UAR_APP_TYPE_APP = uarAppTypeApp;
+    }
+
+    @Value("${user_profile_regin_data_level_es}")
+    public void setUserProfileReginDataLevelES(Integer userProfileReginDataLevelES) {
+        this.USER_PROFILE_REGIN_DATA_LEVEL_ES = userProfileReginDataLevelES;
+    }
+
+    @Value("${user_profile_regin_data_level_mysql}")
+    public void setUserProfileReginDataLevelMysql(Integer userProfileReginDataLevelMysql) {
+        this.USER_PROFILE_REGIN_DATA_LEVEL_MYSQL = userProfileReginDataLevelMysql;
     }
 
 }

@@ -23,5 +23,13 @@ public interface UserAnalyseService {
      * @param orginId 机构id
      * @return
      */
-    public Map<String, Object> getUserAnalyseReturnData(String orginId);
+    public Map<String, Object> getUserAnalyseReturnData(String orginId, Integer dataLevel);
+
+    /**
+     * 用户分析接口，计算性别，青老中，前5地域（地域信息从mysql中获取）
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    public Map<String, Object> getUserAnalyseReturnDataBak(String orginId);
 }

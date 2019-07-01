@@ -17,7 +17,7 @@ uar_basic:
 # weishu 数据源配置--用于获取微信相关数据
 weishu_pdmi:
   datasource:
-    url: jdbc:mysql://10.10.32.62:3306/PDMI?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://10.10.32.62:3306/pdmi?useUnicode=true&characterEncoding=utf8
     username: uardev
     password: uardev2017
     driverClassName: com.mysql.jdbc.Driver
@@ -43,4 +43,4 @@ spring:
      data:
         elasticsearch: #ElasticsearchProperties
             cluster-name: elasticsearch_uar
-            cluster-nodes: 10.101.67.4:9300
+            cluster-nodes: 10.101.67.5:9300

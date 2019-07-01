@@ -5,6 +5,7 @@
         <id column="id" property="id" jdbcType="INTEGER"/>
         <result column="origin_id" property="originId" jdbcType="VARCHAR"/>
         <result column="return_date" property="returnDate" jdbcType="TIMESTAMP"/>
+        <result column="data_level" property="dataLevel" jdbcType="INTEGER"/>
     </resultMap>
     <resultMap id="ResultMapWithBLOBs" type="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord"
                extends="BaseResultMap">
@@ -23,10 +24,24 @@
         FROM uar_origin_return_record torr
         WHERE torr.origin_id = #{originId} AND torr.return_date = #{searchDate}
     </select>
+    <!-- 根据机构id和查询时间，查询接口返回值 -->
+    <select id="findOriginReturnRecordByOriginIdAndDataLevel" resultType="java.lang.String"
+            parameterType="java.util.Map">
+        SELECT
+        return_json
+        FROM uar_origin_return_record torr
+        WHERE torr.origin_id = #{originId} AND torr.return_date = #{searchDate} and torr.data_level=#{dataLevel}
+    </select>
     <!-- 查询指定机构id的最新一条返回记录 -->
     <select id="findOriginReturnRecordByOriginIdAndLastDate" resultMap="ResultMapWithBLOBs"
             parameterType="java.lang.String">
         SELECT * FROM uar_origin_return_record uorr WHERE uorr.origin_id = #{originId} ORDER BY return_date DESC LIMIT
+        0,1
+    </select>
+    <!-- 查询指定机构id的最新一条返回记录 -->
+    <select id="findOriginReturnRecordByOriginIdAndLastDateAndDataLevel" resultMap="ResultMapWithBLOBs"
+            parameterType="java.util.Map">
+        SELECT * FROM uar_origin_return_record uorr WHERE uorr.origin_id = #{originId} and uorr.data_level = #{dataLevel} ORDER BY return_date DESC LIMIT
         0,1
     </select>
 
@@ -45,9 +60,9 @@
     </delete>
     <insert id="insert" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
         insert into uar_origin_return_record (id, origin_id, return_date,
-        return_json)
+        return_json, data_level)
         values (#{id,jdbcType=INTEGER}, #{originId,jdbcType=VARCHAR}, #{returnDate,jdbcType=TIMESTAMP},
-        #{returnJson,jdbcType=LONGVARCHAR})
+        #{returnJson,jdbcType=LONGVARCHAR}, #{dataLevel,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord">
         insert into uar_origin_return_record

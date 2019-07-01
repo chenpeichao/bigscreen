@@ -3,13 +3,15 @@ package com.hubpd.bigscreen.service.common.impl;
 import com.alibaba.fastjson.JSON;
 import com.hubpd.bigscreen.bean.origin_return.OriginReturnRecord;
 import com.hubpd.bigscreen.bean.uar_profile.UserAnalyse;
+import com.hubpd.bigscreen.dto.UserAreaCountDTO;
+import com.hubpd.bigscreen.mapper.uar_profile.UarAtAreaMapper;
 import com.hubpd.bigscreen.mapper.uar_profile.UserAnalyseMapper;
 import com.hubpd.bigscreen.service.common.TaskGetUserAnalyseService;
 import com.hubpd.bigscreen.service.origin_return.DicRegionService;
 import com.hubpd.bigscreen.service.origin_return.OriginReturnRecordService;
+import com.hubpd.bigscreen.service.origin_return.UarProfileBigscreenAreaDicService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
-import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
-import com.hubpd.bigscreen.service.uar_basic.impl.UarBasicAppinfoServiceImpl;
+import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
 import com.hubpd.bigscreen.vo.UserAnalyseRegionVO;
 import com.hubpd.bigscreen.vo.UserAnalyseVO;
@@ -20,7 +22,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -47,6 +48,10 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
     @Autowired
     private UserAnalyseMapper userAnalyseMapper;
     @Autowired
+    private UarAtAreaMapper uarAtAreaMapper;
+    @Autowired
+    private UarProfileBigscreenAreaDicService uarProfileBigscreenAreaDicService;
+    @Autowired
     private UarBasicAppinfoService uarBasicAppinfoService;
 
     @Autowired
@@ -62,16 +67,16 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
      * @return
      */
     /**
-     * 这里进行标注为异步任务，在执行此方法的时候，会单独开启线程来执行---但是此方法不能再本类调用
+     * 这里进行标注为异步任务，在执行此方法的时候，会单独开启线程来执行---但是此方法不能在本类调用
      */
     @Async
-    public Map<String, Object> getUserAnalyse(String orginId) {
+    public Map<String, Object> getUserAnalyse(String orginId, Integer dataLevel) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String currentDateStr = DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd");
 
         // 首先从mysql数据库中查询数据，如果有数据，则直接返回，没有则进行es计算返回，并保存查询天和机构的数据到mysql数据库缓存
-        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+        String originReturnRecordStr = originReturnRecordService.findOriginReturnRecordByOriginIdAndDataLevel(orginId, currentDateStr, dataLevel);
         if (StringUtils.isNotBlank(originReturnRecordStr)) {
             resultMap.put("code", 1);
             resultMap.put("data", JSON.parse(originReturnRecordStr));
@@ -87,6 +92,8 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
         List<UserAnalyseVO> userAnalyseVOList = new ArrayList<UserAnalyseVO>();
 
         for (String appName : appaccountMap.keySet()) {
+            List<UserAnalyseRegionVO> userAnalyseRegionVOList = new ArrayList<UserAnalyseRegionVO>();
+
             logger.info("应用【" + appName + "】用户分析查询-------------开始");
             UserAnalyseVO userAnalyseVO = new UserAnalyseVO();
             //根据应用名称，获取应用的appacount(即应用的at)
@@ -104,13 +111,17 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
                 userAnalyseVO.getAge().put("oldNum", oldNum);
 
                 List<String> allDicRegionName = dicRegionService.findAllDicRegionName();
-                List<UserAnalyseRegionVO> userAnalyseRegionVOList = new ArrayList<UserAnalyseRegionVO>();
+
+
                 //遍历所有省份的信息
-                for (String regionName : allDicRegionName) {
-                    UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
-                    userAnalyseRegionVO.setRegionName(regionName);
-                    userAnalyseRegionVO.setNum(getTotalElements(appaccountList.get(0), "province", regionName));
-                    userAnalyseRegionVOList.add(userAnalyseRegionVO);
+                if (dataLevel.equals(Constants.USER_PROFILE_REGIN_DATA_LEVEL_ES)) {
+                    for (String regionName : allDicRegionName) {
+                        UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
+                        userAnalyseRegionVO.setRegionName(regionName);
+                        //从画像es中获取数据
+                        userAnalyseRegionVO.setNum(getTotalElements(appaccountList.get(0), "province", regionName));
+                        userAnalyseRegionVOList.add(userAnalyseRegionVO);
+                    }
                 }
 
                 //当有两个appkey时累加---即是移动应用有android和ios的appkey的区分
@@ -126,26 +137,63 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
                     userAnalyseVO.getAge().put("middleNum", userAnalyseVO.getAge().get("middleNum") + middleNum1);
                     userAnalyseVO.getAge().put("oldNum", userAnalyseVO.getAge().get("oldNum") + oldNum1);
 
-                    for (String regionName : allDicRegionName) {
-                        Long provinceNum1 = getTotalElements(appaccountList.get(1), "province", regionName);
-                        for (UserAnalyseRegionVO userAnalyseRegionVO : userAnalyseRegionVOList) {
-                            if (userAnalyseRegionVO.getRegionName().equals(regionName)) {
-                                userAnalyseRegionVO.setNum(userAnalyseRegionVO.getNum() + provinceNum1);
-                                break;
+
+                    //遍历所有省份的信息
+                    if (dataLevel.equals(Constants.USER_PROFILE_REGIN_DATA_LEVEL_ES)) {
+                        for (String regionName : allDicRegionName) {
+                            Long provinceNum1 = getTotalElements(appaccountList.get(1), "province", regionName);
+                            for (UserAnalyseRegionVO userAnalyseRegionVO : userAnalyseRegionVOList) {
+                                if (userAnalyseRegionVO.getRegionName().equals(regionName)) {
+                                    userAnalyseRegionVO.setNum(userAnalyseRegionVO.getNum() + provinceNum1);
+                                    break;
+                                }
                             }
                         }
                     }
                 }
-
-                userAnalyseRegionVOList.sort(new Comparator<UserAnalyseRegionVO>() {
-                    @Override
-                    public int compare(UserAnalyseRegionVO o1, UserAnalyseRegionVO o2) {
-                        Long tmp = o2.getNum() - o1.getNum();
-                        return tmp.intValue();
-                    }
-                });
-                userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
             }
+
+            if (Constants.USER_PROFILE_REGIN_DATA_LEVEL_MYSQL.equals(dataLevel)) {
+                //从spark跑ip信息的mysql中获取数据
+                Map<String, Object> paramMap = new HashMap<String, Object>();
+                paramMap.put("appKeySet", appaccountList);
+                List<UserAreaCountDTO> userCountInProvinceByAppKey = uarAtAreaMapper.findUserCountInProvinceByAppKey(paramMap);
+
+                //查询用户画像地域字典表
+                Map<String, String> allProfileProvinceAndShouNameDic = uarProfileBigscreenAreaDicService.getAllProfileProvinceAndShouNameDic();
+
+                boolean flag = false;
+                for (String regionNameFlag : allProfileProvinceAndShouNameDic.keySet()) {
+                    UserAnalyseRegionVO userAnalyseRegionVO = new UserAnalyseRegionVO();
+                    userAnalyseRegionVO.setRegionName(allProfileProvinceAndShouNameDic.get(regionNameFlag));
+
+                    for (UserAreaCountDTO userAreaCountDTO : userCountInProvinceByAppKey) {
+                        if (userAreaCountDTO.getRegionName().equals(regionNameFlag)) {
+                            //从画像es中获取数据
+                            userAnalyseRegionVO.setNum(userAreaCountDTO.getNum());
+                            flag = true;
+                        }
+                    }
+                    if (!flag) {
+                        userAnalyseRegionVO.setNum(0l);
+                    }
+                    flag = false;
+
+                    userAnalyseRegionVOList.add(userAnalyseRegionVO);
+                }
+            }
+
+            userAnalyseRegionVOList.sort(new Comparator<UserAnalyseRegionVO>() {
+                @Override
+                public int compare(UserAnalyseRegionVO o1, UserAnalyseRegionVO o2) {
+                    Long tmp = o2.getNum() - o1.getNum();
+                    return tmp.intValue();
+                }
+            });
+            userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
+
+            //对于dataLevel为从mysql中获取是，重新赋值地域信息
+
             logger.info("应用【" + appName + "】用户分析查询-------------结束");
             userAnalyseVO.setAppName(appName);
             userAnalyseVOList.add(userAnalyseVO);
@@ -153,12 +201,13 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
 
         logger.info("机构id为【" + orginId + "】的数据打印完成");
         // 对于指定机构在指定查询日期的返回数据，进行mysql数据库的缓存
-        String returnDate = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
+        String returnDate = originReturnRecordService.findOriginReturnRecordByOriginIdDataLevel(orginId, currentDateStr, dataLevel);
         if (StringUtils.isBlank(returnDate)) {
             OriginReturnRecord originReturnRecord = new OriginReturnRecord();
             originReturnRecord.setOriginId(orginId);
             originReturnRecord.setReturnDate(currentDateStr);
             originReturnRecord.setReturnJson(JSON.toJSONString(userAnalyseVOList));
+            originReturnRecord.setDataLevel(dataLevel);
 
             //接口返回记录保存mysql，缓存
             originReturnRecordService.insert(originReturnRecord);

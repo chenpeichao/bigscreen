@@ -1,6 +1,7 @@
 package com.hubpd.bigscreen.controller;
 
 import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
+import com.hubpd.bigscreen.utils.Constants;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -55,7 +56,41 @@ public class UserAnalyseController {
         logger.info("用户分析接口调用，机构id为【" + orginIdStr + "】");
 
         try {
-            return userAnalyseService.getUserAnalyseReturnData(orginIdStr);
+            return userAnalyseService.getUserAnalyseReturnData(orginIdStr, Constants.USER_PROFILE_REGIN_DATA_LEVEL_ES);
+        } catch (Exception e) {
+            logger.error("getUserAnalyse用户分析接口调用失败-发生未知错误", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "接口调用失败，请重试！！");
+            return resultMap;
+        }
+    }
+
+    /**
+     * 用户分析接口，计算性别，青老中，前5地域
+     *
+     * @param request
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/getUserAnalyseBak")
+    public Map<String, Object> getUserAnalyseBak(HttpServletRequest request, HttpServletResponse response) {
+        // 解决跨域问题
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String orginIdStr = request.getParameter("orginId");
+        if (StringUtils.isBlank(orginIdStr)) {
+            resultMap.put("code", 0);
+            resultMap.put("message", "机构id未传递");
+            return resultMap;
+        }
+
+        orginIdStr = orginIdStr.trim();
+        logger.info("用户分析接口调用，机构id为【" + orginIdStr + "】");
+
+        try {
+            return userAnalyseService.getUserAnalyseReturnData(orginIdStr, Constants.USER_PROFILE_REGIN_DATA_LEVEL_MYSQL);
         } catch (Exception e) {
             logger.error("getUserAnalyse用户分析接口调用失败-发生未知错误", e);
             resultMap.put("code", 0);

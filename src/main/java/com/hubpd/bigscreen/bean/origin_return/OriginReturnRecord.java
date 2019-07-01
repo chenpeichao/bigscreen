@@ -11,6 +11,8 @@ public class OriginReturnRecord {
 
     private String returnJson;
 
+    private Integer dataLevel;
+
     public Integer getId() {
         return id;
     }
@@ -41,5 +43,13 @@ public class OriginReturnRecord {
 
     public void setReturnJson(String returnJson) {
         this.returnJson = returnJson == null ? null : returnJson.trim();
+    }
+
+    public Integer getDataLevel() {
+        return dataLevel;
+    }
+
+    public void setDataLevel(Integer dataLevel) {
+        this.dataLevel = dataLevel;
     }
 }

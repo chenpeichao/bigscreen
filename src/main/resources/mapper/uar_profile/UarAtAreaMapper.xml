@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_profile.UarAtAreaMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_profile.UarAtArea">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="at" property="at" jdbcType="VARCHAR"/>
+        <result column="uuid" property="uuid" jdbcType="VARCHAR"/>
+        <result column="country" property="country" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="district" property="district" jdbcType="VARCHAR"/>
+        <result column="township" property="township" jdbcType="VARCHAR"/>
+        <result column="street" property="street" jdbcType="VARCHAR"/>
+        <result column="day" property="day" jdbcType="VARCHAR"/>
+        <result column="ctime" property="ctime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, at, uuid, country, province, city, district, township, street, day, ctime
+  </sql>
+
+    <!-- 根据appkey集合查询其下市级别的用户数 -->
+    <select id="findUserCountInProvinceByAppKey" resultType="com.hubpd.bigscreen.dto.UserAreaCountDTO"
+            parameterType="java.util.Map">
+        SELECT province regionName, COUNT(DISTINCT(UUID)) AS num FROM uar_at_area
+        WHERE at IN (
+        <foreach collection="appKeySet" item="appKey" separator=",">
+            #{appKey}
+        </foreach>
+        )
+        GROUP BY province
+        ORDER BY num DESC, province
+    </select>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from uar_at_area
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from uar_at_area
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarAtArea">
+    insert into uar_at_area (id, at, uuid, 
+      country, province, city, 
+      district, township, street, 
+      day, ctime)
+    values (#{id,jdbcType=INTEGER}, #{at,jdbcType=VARCHAR}, #{uuid,jdbcType=VARCHAR}, 
+      #{country,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
+      #{district,jdbcType=VARCHAR}, #{township,jdbcType=VARCHAR}, #{street,jdbcType=VARCHAR}, 
+      #{day,jdbcType=VARCHAR}, #{ctime,jdbcType=TIMESTAMP})
+  </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarAtArea">
+        insert into uar_at_area
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="at != null">
+                at,
+            </if>
+            <if test="uuid != null">
+                uuid,
+            </if>
+            <if test="country != null">
+                country,
+            </if>
+            <if test="province != null">
+                province,
+            </if>
+            <if test="city != null">
+                city,
+            </if>
+            <if test="district != null">
+                district,
+            </if>
+            <if test="township != null">
+                township,
+            </if>
+            <if test="street != null">
+                street,
+            </if>
+            <if test="day != null">
+                day,
+            </if>
+            <if test="ctime != null">
+                ctime,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="at != null">
+                #{at,jdbcType=VARCHAR},
+            </if>
+            <if test="uuid != null">
+                #{uuid,jdbcType=VARCHAR},
+            </if>
+            <if test="country != null">
+                #{country,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null">
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null">
+                #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="township != null">
+                #{township,jdbcType=VARCHAR},
+            </if>
+            <if test="street != null">
+                #{street,jdbcType=VARCHAR},
+            </if>
+            <if test="day != null">
+                #{day,jdbcType=VARCHAR},
+            </if>
+            <if test="ctime != null">
+                #{ctime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarAtArea">
+        update uar_at_area
+        <set>
+            <if test="at != null">
+                at = #{at,jdbcType=VARCHAR},
+            </if>
+            <if test="uuid != null">
+                uuid = #{uuid,jdbcType=VARCHAR},
+            </if>
+            <if test="country != null">
+                country = #{country,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null">
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="district != null">
+                district = #{district,jdbcType=VARCHAR},
+            </if>
+            <if test="township != null">
+                township = #{township,jdbcType=VARCHAR},
+            </if>
+            <if test="street != null">
+                street = #{street,jdbcType=VARCHAR},
+            </if>
+            <if test="day != null">
+                day = #{day,jdbcType=VARCHAR},
+            </if>
+            <if test="ctime != null">
+                ctime = #{ctime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarAtArea">
+    update uar_at_area
+    set at = #{at,jdbcType=VARCHAR},
+      uuid = #{uuid,jdbcType=VARCHAR},
+      country = #{country,jdbcType=VARCHAR},
+      province = #{province,jdbcType=VARCHAR},
+      city = #{city,jdbcType=VARCHAR},
+      district = #{district,jdbcType=VARCHAR},
+      township = #{township,jdbcType=VARCHAR},
+      street = #{street,jdbcType=VARCHAR},
+      day = #{day,jdbcType=VARCHAR},
+      ctime = #{ctime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

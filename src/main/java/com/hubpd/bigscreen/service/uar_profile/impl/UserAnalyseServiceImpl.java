@@ -63,7 +63,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
      * @param orginId 机构id
      * @return
      */
-    public Map<String, Object> getUserAnalyseReturnData(String orginId) {
+    public Map<String, Object> getUserAnalyseReturnData(String orginId, Integer dataLevel) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String currentDateStr = DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd");
@@ -103,7 +103,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
 //            }
 //        }
         // 2、首先从mysql数据库中查询指定机构id的最新一条返回记录
-        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginIdAndLastDate(orginId);
+        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginIdAndLastDateAndDataLevel(orginId, dataLevel);
         if (originReturnRecordDB != null) {
             resultMap.put("code", 1);
             resultMap.put("data", JSON.parse(originReturnRecordDB.getReturnJson()));
@@ -115,7 +115,52 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             List<UarBasicTaskOrgin> taskOriginByOriginIdInBigscreenList = uarBasicUserService.findTaskOriginByOriginIdInBigscreen(orginId);
             if (taskOriginByOriginIdInBigscreenList != null && taskOriginByOriginIdInBigscreenList.size() > 0) {
                 // 当大屏机构表里存在此机构id对应信息，启动新线程执行接口调用
-                taskGetUserAnalyseService.getUserAnalyse(orginId);
+                taskGetUserAnalyseService.getUserAnalyse(orginId, dataLevel);
+                resultMap.put("code", 0);
+                resultMap.put("message", "由于此机构【" + currentDateStr + "】的数据未抓取，请1小时后再试！！");
+                return resultMap;
+            } else {
+                resultMap.put("code", 0);
+                resultMap.put("message", "未授权的机构id，请联系管理员授权！！");
+                return resultMap;
+            }
+        }
+    }
+
+    /**
+     * 用户分析接口，计算性别，青老中，前5地域（地域信息从mysql中获取）
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    public Map<String, Object> getUserAnalyseReturnDataBak(String orginId) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String currentDateStr = DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd");
+
+        //1、首先查询传递的机构id，是否在uar中是有效的机构id
+        List<String> allOriginIdListInUar = uarBasicUserService.findAllOriginIdListInUar();
+        if (!allOriginIdListInUar.contains(orginId)) {
+            //传递的机构id在uar中不存在时，返回null数据
+            resultMap.put("code", 0);
+            resultMap.put("message", "系统中不存在此机构id");
+            return resultMap;
+        }
+
+        // 2、首先从mysql数据库中查询指定机构id的最新一条返回记录
+        OriginReturnRecord originReturnRecordDB = originReturnRecordService.findOriginReturnRecordByOriginIdAndLastDateAndDataLevel(orginId, 1);
+        if (originReturnRecordDB != null) {
+            resultMap.put("code", 1);
+            resultMap.put("data", JSON.parse(originReturnRecordDB.getReturnJson()));
+            return resultMap;
+        } else {
+            // 当mysql中没有此机构id下的数据时
+            //1、向机构id大屏缓存表里面添加此机构id，
+            //1.1、首先查询机构id在大屏机构表里面有没有存储
+            List<UarBasicTaskOrgin> taskOriginByOriginIdInBigscreenList = uarBasicUserService.findTaskOriginByOriginIdInBigscreen(orginId);
+            if (taskOriginByOriginIdInBigscreenList != null && taskOriginByOriginIdInBigscreenList.size() > 0) {
+                // 当大屏机构表里存在此机构id对应信息，启动新线程执行接口调用
+                taskGetUserAnalyseService.getUserAnalyse(orginId, 1);
                 resultMap.put("code", 0);
                 resultMap.put("message", "由于此机构【" + currentDateStr + "】的数据未抓取，请1小时后再试！！");
                 return resultMap;
@@ -135,6 +180,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             BoolQueryBuilder builder = QueryBuilders.boolQuery();
             builder.must(QueryBuilders.queryStringQuery("at : " + at));
             builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
+
             //2.构建查询
             NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
             //2.0 设置QueryBuilder
