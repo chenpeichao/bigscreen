@@ -1,6 +1,10 @@
 package com.hubpd.bigscreen.controller;
 
+import com.github.pagehelper.Page;
+import com.google.common.base.CaseFormat;
+import com.hubpd.bigscreen.dto.PubRankDTO;
 import com.hubpd.bigscreen.service.weishu_pdmi.WXService;
+import com.hubpd.bigscreen.utils.ErrorCode;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -8,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -130,6 +136,110 @@ public class WXController {
             logger.error("getWXUserAnalyse微信内容接口调用失败-发生未知错误", e);
             resultMap.put("code", 0);
             resultMap.put("message", "接口调用失败，请重试！！");
+            return resultMap;
+        }
+    }
+
+    /**
+     * 内蒙公众号榜单列表信息公众号榜单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/pub/rank/list", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> listPubRank(HttpServletRequest request, HttpServletResponse response) {
+        // 解决跨域问题
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        logger.info("调用request param 【" + request.getQueryString() + "】");
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+            String orginIdStr = StringUtils.isNotBlank(request.getParameter("orginId")) ? request.getParameter("orginId").trim() : request.getParameter("orginId");
+            String dayTypeStr = request.getParameter("dayType"); // 查询日期范围7/30
+            String sortName = request.getParameter("sortName"); // 排序字段
+            String sortBy = request.getParameter("sortBy"); // 升序或者降序
+            String pageNumStr = request.getParameter("pageNum"); // 页码
+            String pageSizeStr = request.getParameter("pageSize"); // 页面显示记录数
+            String userFollowStr = request.getParameter("userFollow"); // 关注类型1:自有；2:关注；其它:全部
+
+
+            Integer pageNum = StringUtils.isBlank(pageNumStr) ? 1 : Integer.parseInt(pageNumStr.trim());
+            Integer pageSize = StringUtils.isBlank(pageSizeStr) ? 10 : Integer.parseInt(pageSizeStr.trim());
+            Integer dayType = StringUtils.isBlank(dayTypeStr) ? 7 : Integer.parseInt(dayTypeStr.trim());
+            sortName = StringUtils.isBlank(sortName) ? "impactIndex" : sortName.trim();    //默认根据impact_index字段排序
+            sortBy = StringUtils.isBlank(sortBy) ? "DESC" : sortBy.trim();              //默认为降序
+
+            //排序集合封装，用于验证前台传递排序字段
+            ArrayList<String> sortNameList = new ArrayList<String>();
+            sortNameList.add("readTotal");
+            sortNameList.add("articleTotal");
+            sortNameList.add("likeTotal");
+            sortNameList.add("likeAverage");
+            sortNameList.add("readAverage");
+            sortNameList.add("headlineReadAverage");
+            sortNameList.add("impactIndex");
+
+            if (!sortNameList.contains(sortName.trim())) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "排序字段错误");
+                return resultMap;
+            }
+            //对于排序字段驼峰格式转为下划线格式，方便mapper文件sql执行
+            sortName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, sortName);
+            if (!"asc".equalsIgnoreCase(sortBy) && !"desc".equalsIgnoreCase(sortBy)) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "sortBy关键字错误");
+                return resultMap;
+            }
+            if (pageNum < 1) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "首页pageNum为1");
+                return resultMap;
+            }
+            if (!(dayType == 7 || dayType == 30)) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "天只支持7或30查询");
+                return resultMap;
+            }
+
+            if (StringUtils.isBlank(orginIdStr)) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "request param orginId lack");
+                return resultMap;
+            }
+            Integer userFollow = 0;
+            if (StringUtils.isBlank(userFollowStr)) {
+                userFollowStr = "0";
+            } else {
+                try {
+                    userFollow = Integer.parseInt(userFollowStr.trim());
+                } catch (NumberFormatException e) {
+                    resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                    resultMap.put("message", "userFollow参数格式错误");
+                    return resultMap;
+                }
+            }
+            //当不是自有和关注时，默认查询全部
+            if (userFollow != 1 && userFollow != 2) {
+                userFollow = 0;
+            }
+
+            Page<PubRankDTO> pubRankDTOPage = wxService.queryWechatPubRankList(orginIdStr, userFollow, dayType, pageNum, pageSize, sortName, sortBy);
+            resultMap.put("totalCount", pubRankDTOPage.getTotal());
+            resultMap.put("totalPage", pubRankDTOPage.getPages());
+            resultMap.put("currentPageNum", pubRankDTOPage.getPageNum());
+            resultMap.put("data", pubRankDTOPage.getResult());
+            return resultMap;
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            resultMap.put("status", 0);
+            resultMap.put("msg", "请求参数格式错误");
+            return resultMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("status", 0);
+            resultMap.put("msg", "获取热门类别接口失败");
             return resultMap;
         }
     }

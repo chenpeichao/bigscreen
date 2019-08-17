@@ -35,4 +35,12 @@ public interface UarBasicAppinfoMapper {
      * @return
      */
     public UarBasicAppinfo findAppInfoByAppAccountOrAppAccount2(String appaccount);
+
+    /**
+     * 根据租户id查询租户下的所有网站的appkey
+     *
+     * @param paramMap
+     * @return
+     */
+    public List<UarBasicAppinfo> getAllAppKeyByOrgIdAndAppType(Map<String, Object> paramMap);
 }

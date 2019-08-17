@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 应用appinfo的相关操作
@@ -63,4 +60,31 @@ public class UarBasicAppinfoServiceImpl implements UarBasicAppinfoService {
         return uarBasicAppinfoMapper.findAppInfoByAppAccountOrAppAccount2(appaccount);
     }
 
+    /**
+     * 获取指定租户下网站或app的所有应用appkey
+     *
+     * @param lesseeId 租户id
+     * @param appType  应用标识1：网站；2：客户端;当为null或""时查询网站和app的所有
+     * @return
+     */
+    public Set<String> getAppKeyByLesseeIdAndAppType(String lesseeId, Integer appType) {
+        Set<String> appKeySet = new HashSet<String>();
+
+        //1、根据租户id查询租户下的所有网站的appkey
+        Map<String, Object> getAllAppKeyByOrgIdAndAppTypeParamMap = new HashMap<String, Object>();
+        getAllAppKeyByOrgIdAndAppTypeParamMap.put("lesseeId", lesseeId);
+        getAllAppKeyByOrgIdAndAppTypeParamMap.put("appType", appType);
+        List<UarBasicAppinfo> allAppKeyByOrgIdAndAppType = uarBasicAppinfoMapper.getAllAppKeyByOrgIdAndAppType(getAllAppKeyByOrgIdAndAppTypeParamMap);
+
+        for (UarBasicAppinfo appInfo : allAppKeyByOrgIdAndAppType) {
+            if (StringUtils.isNotBlank(appInfo.getAppaccount())) {
+                appKeySet.add(appInfo.getAppaccount());
+            }
+            if (StringUtils.isNotBlank(appInfo.getAppaccount2())) {
+                appKeySet.add(appInfo.getAppaccount2());
+            }
+        }
+
+        return appKeySet;
+    }
 }

@@ -51,6 +51,14 @@
               OR
               ta.appaccount2= #{appaccount,jdbcType=VARCHAR}
     </select>
+    <!-- 根据租户id以及应用类型获取应用所有的appkey -->
+    <select id="getAllAppKeyByOrgIdAndAppType" parameterType="map" resultMap="BaseResultMap">
+        SELECT ta.appaccount, ta.appaccount2 FROM t_appinfo ta
+        WHERE ta.appmedia = #{lesseeId}
+        <if test="appType != null">
+            AND ta.apptype = #{appType}
+        </if>
+    </select>
 
 
     <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">

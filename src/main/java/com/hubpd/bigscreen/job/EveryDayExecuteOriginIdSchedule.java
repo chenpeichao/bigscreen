@@ -45,10 +45,35 @@ public class EveryDayExecuteOriginIdSchedule {
                 Map<String, Object> userAnalyseES = taskGetUserAnalyseService.getUserAnalyse(originId, Constants.USER_PROFILE_REGIN_DATA_LEVEL_ES);
                 Map<String, Object> userAnalyseMysql = taskGetUserAnalyseService.getUserAnalyse(originId, Constants.USER_PROFILE_REGIN_DATA_LEVEL_MYSQL);
                 if (userAnalyseES != null) {
-                    logger.info("缓存根据机构id【" + originId + "】用户分析指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");
+                    logger.info("缓存根据机构id【" + originId + "】用户分析--from es指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");
+                }
+                if (userAnalyseMysql != null) {
+                    logger.info("缓存根据机构id【" + originId + "】用户分析--from mysql指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");
                 }
             } catch (Exception e) {
                 logger.error("缓存根据机构id【" + originId + "】用户分析指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据失败！", e);
+            }
+        }
+    }
+
+    //对uar_basic中的t_task_origin中的机构的用户画像数据进行缓存(年龄、性别、地域(全省份))
+    @Scheduled(fixedRate = 1000 * 60 * 50)
+//    @Scheduled(cron = "0 0 6 * * ?")
+    public void addUserPortraitCacheTask() {
+        //查询大屏中缓存的所有有效的组织机构id列表
+        List<String> allOriginIdList = uarBasicUserService.findAllOriginIdListInBigscreen();
+
+        logger.info("定时任务缓存根据机构id【" + allOriginIdList.toString() + "】缓存用户分析指定机构当天数据");
+
+        for (String originId : allOriginIdList) {
+            // 对用户分析接口进行调用，目的为了缓存当天接口返回值到mysql数据库
+            try {
+                Map<String, Object> userAnalyse = taskGetUserAnalyseService.getAsyncUserAnalyseAllRegion(originId);
+                if (userAnalyse != null) {
+                    logger.info("缓存根据机构id【" + originId + "】用户画像(年龄、性别、地域(全省份))指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据成功！");
+                }
+            } catch (Exception e) {
+                logger.error("缓存根据机构id【" + originId + "】用户画像(年龄、性别、地域(全省份))指定机构【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd") + "】数据失败！", e);
             }
         }
     }

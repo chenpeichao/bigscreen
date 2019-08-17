@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAutoConfiguration
 @SpringBootApplication
 @EnableScheduling
-@PropertySource(value = {"classpath:config/constant/constant.properties"},encoding="utf-8")
+@PropertySource(value = {"classpath:config/constant/constant.properties", "classpath:config/constant/errorCode.properties", "classpath:config/constant/esconstants.properties"}, encoding = "utf-8")
 //@MapperScan("com.hubpd.bigscreen.mapper")//将项目中对应的mapper类的路径加进来就可以了
 public class BigScreenApplication {
     public static void main(String[] args) {

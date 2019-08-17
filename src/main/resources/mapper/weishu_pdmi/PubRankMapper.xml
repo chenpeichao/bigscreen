@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.weishu_pdmi.PubRankMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.weishu_pdmi.PubRank">
+        <result column="catalog_id" property="catalogId" jdbcType="INTEGER"/>
+        <result column="pub_account_id" property="pubAccountId" jdbcType="INTEGER"/>
+        <result column="article_total" property="articleTotal" jdbcType="INTEGER"/>
+        <result column="message_total" property="messageTotal" jdbcType="INTEGER"/>
+        <result column="read_total" property="readTotal" jdbcType="INTEGER"/>
+        <result column="like_total" property="likeTotal" jdbcType="INTEGER"/>
+        <result column="read_average" property="readAverage" jdbcType="REAL"/>
+        <result column="like_average" property="likeAverage" jdbcType="REAL"/>
+        <result column="headline_read_average" property="headlineReadAverage" jdbcType="REAL"/>
+        <result column="headline_like_average" property="headlineLikeAverage" jdbcType="REAL"/>
+        <result column="impact_index" property="impactIndex" jdbcType="REAL"/>
+        <result column="day_type" property="dayType" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="findPubRankByPubIdListAndParam" resultType="com.hubpd.bigscreen.dto.PubRankDTO"
+            parameterType="java.util.Map">
+        SELECT
+        effectPubTable.wx_id AS 'wxId',
+        effectPubTable.wx_name AS 'wxName',
+        IFNULL(tpr.article_total, 0) AS 'articleTotal',
+        IFNULL(tpr.read_total, 0) AS 'readTotal',
+        IFNULL(tpr.like_total, 0) AS 'likeTotal',
+        IFNULL(tpr.read_average, 0) AS 'readAverage',
+        IFNULL(tpr.like_average, 0) AS 'likeAverage',
+        IFNULL(tpr.headline_read_average, 0) AS 'headlineReadAverage',
+        IFNULL(tpr.headline_like_average, 0) AS 'headlineLikeAverage',
+        IFNULL(tpr.impact_index, 0) AS 'impactIndex',
+        #{dayType} AS 'dayType'
+        FROM t_pub_rank tpr
+        RIGHT JOIN (
+        SELECT tpa.id id, tpa.wx_id wx_id, tpa.wx_name wx_name FROM t_pub_account tpa
+        <if test="pubAccountIdList!=null and pubAccountIdList.size() > 0">
+            <where>
+                AND tpa.id in
+                <foreach collection="pubAccountIdList" item="pubAccountId"
+                         index="index" open="(" close=")" separator=",">
+                    #{pubAccountId}
+                </foreach>
+            </where>
+        </if>
+        ) effectPubTable ON tpr.pub_account_id = effectPubTable.id
+        AND tpr.day_type = #{dayType}
+        GROUP BY effectPubTable.id
+        <choose>
+            <when test="sortName != null and sortName != '' and sortBy != null and sortBy != ''">
+                order by ${sortName} ${sortBy}, effectPubTable.wx_id ASC
+            </when>
+            <otherwise>
+                order by impact_index DESC, effectPubTable.wx_id ASC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubRank">
+    insert into t_pub_rank (catalog_id, pub_account_id, article_total, 
+      message_total, read_total, like_total, 
+      read_average, like_average, headline_read_average, 
+      headline_like_average, impact_index, day_type
+      )
+    values (#{catalogId,jdbcType=INTEGER}, #{pubAccountId,jdbcType=INTEGER}, #{articleTotal,jdbcType=INTEGER}, 
+      #{messageTotal,jdbcType=INTEGER}, #{readTotal,jdbcType=INTEGER}, #{likeTotal,jdbcType=INTEGER}, 
+      #{readAverage,jdbcType=REAL}, #{likeAverage,jdbcType=REAL}, #{headlineReadAverage,jdbcType=REAL}, 
+      #{headlineLikeAverage,jdbcType=REAL}, #{impactIndex,jdbcType=REAL}, #{dayType,jdbcType=INTEGER}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubRank">
+        insert into t_pub_rank
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="catalogId != null">
+                catalog_id,
+            </if>
+            <if test="pubAccountId != null">
+                pub_account_id,
+            </if>
+            <if test="articleTotal != null">
+                article_total,
+            </if>
+            <if test="messageTotal != null">
+                message_total,
+            </if>
+            <if test="readTotal != null">
+                read_total,
+            </if>
+            <if test="likeTotal != null">
+                like_total,
+            </if>
+            <if test="readAverage != null">
+                read_average,
+            </if>
+            <if test="likeAverage != null">
+                like_average,
+            </if>
+            <if test="headlineReadAverage != null">
+                headline_read_average,
+            </if>
+            <if test="headlineLikeAverage != null">
+                headline_like_average,
+            </if>
+            <if test="impactIndex != null">
+                impact_index,
+            </if>
+            <if test="dayType != null">
+                day_type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="catalogId != null">
+                #{catalogId,jdbcType=INTEGER},
+            </if>
+            <if test="pubAccountId != null">
+                #{pubAccountId,jdbcType=INTEGER},
+            </if>
+            <if test="articleTotal != null">
+                #{articleTotal,jdbcType=INTEGER},
+            </if>
+            <if test="messageTotal != null">
+                #{messageTotal,jdbcType=INTEGER},
+            </if>
+            <if test="readTotal != null">
+                #{readTotal,jdbcType=INTEGER},
+            </if>
+            <if test="likeTotal != null">
+                #{likeTotal,jdbcType=INTEGER},
+            </if>
+            <if test="readAverage != null">
+                #{readAverage,jdbcType=REAL},
+            </if>
+            <if test="likeAverage != null">
+                #{likeAverage,jdbcType=REAL},
+            </if>
+            <if test="headlineReadAverage != null">
+                #{headlineReadAverage,jdbcType=REAL},
+            </if>
+            <if test="headlineLikeAverage != null">
+                #{headlineLikeAverage,jdbcType=REAL},
+            </if>
+            <if test="impactIndex != null">
+                #{impactIndex,jdbcType=REAL},
+            </if>
+            <if test="dayType != null">
+                #{dayType,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+</mapper>

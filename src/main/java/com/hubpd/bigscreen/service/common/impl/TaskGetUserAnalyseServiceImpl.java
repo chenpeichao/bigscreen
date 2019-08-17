@@ -11,6 +11,7 @@ import com.hubpd.bigscreen.service.origin_return.DicRegionService;
 import com.hubpd.bigscreen.service.origin_return.OriginReturnRecordService;
 import com.hubpd.bigscreen.service.origin_return.UarProfileBigscreenAreaDicService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
+import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
 import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
 import com.hubpd.bigscreen.vo.UserAnalyseRegionVO;
@@ -53,12 +54,8 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
     private UarProfileBigscreenAreaDicService uarProfileBigscreenAreaDicService;
     @Autowired
     private UarBasicAppinfoService uarBasicAppinfoService;
-
     @Autowired
-    //es链接实体
-    private Client client;
-    @Autowired
-    private ElasticsearchTemplate elasticsearchTemplate;
+    private UserAnalyseService userAnalyseService;
 
     /**
      * 用户分析接口，计算性别，青老中，前5地域
@@ -190,7 +187,8 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
                     return tmp.intValue();
                 }
             });
-            userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
+//            userAnalyseVO.setRegion(userAnalyseRegionVOList.subList(0, userAnalyseRegionVOList.size() > 5 ? 5 : userAnalyseRegionVOList.size()));
+            userAnalyseVO.setRegion(userAnalyseRegionVOList);
 
             //对于dataLevel为从mysql中获取是，重新赋值地域信息
 
@@ -216,6 +214,19 @@ public class TaskGetUserAnalyseServiceImpl implements TaskGetUserAnalyseService 
         resultMap.put("code", 1);
         resultMap.put("data", userAnalyseVOList);
         return resultMap;
+    }
+
+    /**
+     * 用户分析接口，计算性别，青老中，全省份地域
+     *
+     * @param orginId 机构id
+     * @return
+     */
+    /**
+     * 这里进行标注为异步任务，在执行此方法的时候，会单独开启线程来执行---但是此方法不能再本类调用
+     */
+    public Map<String, Object> getAsyncUserAnalyseAllRegion(String orginId) {
+        return userAnalyseService.getUserAnalyseAllRegion(orginId);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 应用appinfo的相关操作
@@ -27,4 +28,13 @@ public interface UarBasicAppinfoService {
      * @return
      */
     public UarBasicAppinfo findAppInfoByAppAccountOrAppAccount2(String appaccount);
+
+    /**
+     * 获取指定租户下网站或app的所有应用appkey
+     *
+     * @param lesseeId 租户id
+     * @param appType  应用标识1：网站；2：客户端
+     * @return
+     */
+    public Set<String> getAppKeyByLesseeIdAndAppType(String lesseeId, Integer appType);
 }

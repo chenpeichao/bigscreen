@@ -9,13 +9,6 @@ import java.util.Map;
  * @create 2018-08-11 20:07
  **/
 public interface UserAnalyseService {
-//    /**
-//     * 用户分析接口，计算性别，青老中，前5地域
-//     *
-//     * @param orginId 机构id
-//     * @return
-//     */
-//    public Map<String, Object> getUserAnalyse(String orginId);
 
     /**
      * 用户分析接口，计算性别，青老中，前5地域
@@ -26,10 +19,10 @@ public interface UserAnalyseService {
     public Map<String, Object> getUserAnalyseReturnData(String orginId, Integer dataLevel);
 
     /**
-     * 用户分析接口，计算性别，青老中，前5地域（地域信息从mysql中获取）
+     * 用户分析接口，计算性别，青老中，全省份地域
      *
      * @param orginId 机构id
      * @return
      */
-    public Map<String, Object> getUserAnalyseReturnDataBak(String orginId);
+    public Map<String, Object> getUserAnalyseAllRegion(String orginId);
 }
