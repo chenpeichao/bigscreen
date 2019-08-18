@@ -1,6 +1,7 @@
 package com.hubpd.bigscreen.service.weishu_pdmi;
 
 import com.github.pagehelper.Page;
+import com.hubpd.bigscreen.dto.PubArticleDTO;
 import com.hubpd.bigscreen.dto.PubRankDTO;
 import com.hubpd.bigscreen.dto.SelfPubRankDTO;
 
@@ -58,4 +59,21 @@ public interface WXService {
      */
     public Page<SelfPubRankDTO> queryWechatSelfPubRankList(String orginIdStr, Integer dayType,
                                                            Integer pageNum, Integer pageSize, String sortName, String sortBy);
+
+    /**
+     * 查询指定租户下公众号的文章列表
+     *
+     * @param orginIdStr       租户id
+     * @param headType         头条类型(0:全部；1:头条；2:非头条)
+     * @param userFollow       用户关注类型(0:全部；1:自有；2:关注)
+     * @param startPublishTime 文章发布起始时间(yyyy-MM-dd HH:mm:ss)
+     * @param endPublishTime   文章发布截止时间(yyyy-MM-dd HH:mm:ss)
+     * @param pageNum          页码
+     * @param pageSize         每页显示条数
+     * @param sortName         排序字段
+     * @param sortBy           升序/降序
+     * @return
+     */
+    public Page<PubArticleDTO> getPubArticlelist(String orginIdStr, Integer headType, Integer userFollow, String startPublishTime, String endPublishTime,
+                                                 Integer pageNum, Integer pageSize, String sortName, String sortBy);
 }

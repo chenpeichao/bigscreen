@@ -26,7 +26,61 @@
   <sql id="Blob_Column_List" >
     abstract, content, ext_data
   </sql>
-  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+
+    <!-- 获取公众号集合的微信文章列表 -->
+    <select id="getPubArticlelist" resultType="com.hubpd.bigscreen.dto.PubArticleDTO"
+            parameterType="java.util.Map">
+        SELECT
+        article1.publish_time AS 'publishTime',
+        article1.title AS 'articleTitle',
+        article1.url AS 'articleUrl',
+        stat1.total_read_num AS 'readTotal',
+        stat1.total_like_num AS 'likeTotal',
+        article1.id AS 'articleId',
+        article1.msgid AS 'articleMsgId',
+        article1.msgindex AS 'articleMsgIndex'
+        FROM t_article_stat stat1 RIGHT JOIN
+        (SELECT article_id, MAX(ref_date) AS 'maxDate' FROM t_article_stat
+        <if test="pubAccountIdList!=null and pubAccountIdList.size() > 0">
+            <where>
+                AND pub_account_id in
+                <foreach collection="pubAccountIdList" item="pubAccountId"
+                         index="index" open="(" close=")" separator=",">
+                    #{pubAccountId}
+                </foreach>
+            </where>
+        </if>
+
+        <choose>
+            <when test="headType==0">
+                and 1=1
+            </when>
+            <when test="headType==1">
+                and msgindex=1
+            </when>
+            <when test="headType==2">
+                and msgindex!=1
+            </when>
+        </choose>
+
+        GROUP BY article_id) stat2
+        ON stat1.article_id=stat2.article_id AND stat1.ref_date =stat2.maxDate
+        JOIN (SELECT * FROM t_article WHERE
+        <![CDATA[
+      publish_time >= #{startPublishTime} AND publish_time <= #{endPublishTime}) article1
+      ON article1.id=stat2.article_id
+    ]]>
+        <choose>
+            <when test="sortName != null and sortName != '' and sortBy != null and sortBy != ''">
+                order by ${sortName} ${sortBy}, publishTime ASC
+            </when>
+            <otherwise>
+                order by publishTime DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     ,
