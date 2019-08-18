@@ -5,7 +5,7 @@ import com.hubpd.bigscreen.utils.serializer.RoundDoulbeSerializer;
 import com.hubpd.bigscreen.utils.serializer.ThoustandSeparatorSerializer;
 
 /**
- * 内蒙微信公众号榜单
+ * 微信公众号榜单
  *
  * @author cpc
  * @create 2018-04-16 18:05

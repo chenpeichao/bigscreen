@@ -3,6 +3,7 @@ package com.hubpd.bigscreen.controller;
 import com.github.pagehelper.Page;
 import com.google.common.base.CaseFormat;
 import com.hubpd.bigscreen.dto.PubRankDTO;
+import com.hubpd.bigscreen.dto.SelfPubRankDTO;
 import com.hubpd.bigscreen.service.weishu_pdmi.WXService;
 import com.hubpd.bigscreen.utils.ErrorCode;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
@@ -141,7 +142,7 @@ public class WXController {
     }
 
     /**
-     * 内蒙公众号榜单列表信息公众号榜单
+     * 公众号榜单列表信息公众号榜单
      *
      * @return
      */
@@ -151,7 +152,7 @@ public class WXController {
         // 解决跨域问题
         response.setHeader("Access-Control-Allow-Origin", "*");
 
-        logger.info("调用request param 【" + request.getQueryString() + "】");
+        logger.info("调用/pub/rank/list接口request param 【" + request.getQueryString() + "】");
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
@@ -230,6 +231,90 @@ public class WXController {
             resultMap.put("totalPage", pubRankDTOPage.getPages());
             resultMap.put("currentPageNum", pubRankDTOPage.getPageNum());
             resultMap.put("data", pubRankDTOPage.getResult());
+            return resultMap;
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            resultMap.put("status", 0);
+            resultMap.put("msg", "请求参数格式错误");
+            return resultMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("status", 0);
+            resultMap.put("msg", "获取热门类别接口失败");
+            return resultMap;
+        }
+    }
+
+    /**
+     * 自有公众号榜单列表信息公众号榜单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/selfPub/rank/list", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> listSelfPubRank(HttpServletRequest request, HttpServletResponse response) {
+        // 解决跨域问题
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        logger.info("调用/selfPub/rank/list接口request param 【" + request.getQueryString() + "】");
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+            String orginIdStr = StringUtils.isNotBlank(request.getParameter("orginId")) ? request.getParameter("orginId").trim() : request.getParameter("orginId");
+            String dayTypeStr = request.getParameter("dayType"); // 查询日期范围7/30
+            String sortName = request.getParameter("sortName"); // 排序字段
+            String sortBy = request.getParameter("sortBy"); // 升序或者降序
+            String pageNumStr = request.getParameter("pageNum"); // 页码
+            String pageSizeStr = request.getParameter("pageSize"); // 页面显示记录数
+
+            Integer pageNum = StringUtils.isBlank(pageNumStr) ? 1 : Integer.parseInt(pageNumStr.trim());
+            Integer pageSize = StringUtils.isBlank(pageSizeStr) ? 10 : Integer.parseInt(pageSizeStr.trim());
+            Integer dayType = StringUtils.isBlank(dayTypeStr) ? 7 : Integer.parseInt(dayTypeStr.trim());
+            sortName = StringUtils.isBlank(sortName) ? "cumulateUser" : sortName.trim();    //默认根据累计关注人数字段排序
+            sortBy = StringUtils.isBlank(sortBy) ? "DESC" : sortBy.trim();              //默认为降序
+
+            //排序集合封装，用于验证前台传递排序字段
+            ArrayList<String> sortNameList = new ArrayList<String>();
+            sortNameList.add("articleReadNum");
+            sortNameList.add("articleLikeNum");
+            sortNameList.add("newSum");
+            sortNameList.add("cancelSum");
+            sortNameList.add("cumulateUser");
+
+            if (!sortNameList.contains(sortName.trim())) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "排序字段错误");
+                return resultMap;
+            }
+//            //对于排序字段驼峰格式转为下划线格式，方便mapper文件sql执行
+//            sortName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, sortName);
+            if (!"asc".equalsIgnoreCase(sortBy) && !"desc".equalsIgnoreCase(sortBy)) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "sortBy关键字错误");
+                return resultMap;
+            }
+            if (pageNum < 1) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "首页pageNum为1");
+                return resultMap;
+            }
+            if (!(dayType == 7 || dayType == 30)) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "天只支持7或30查询");
+                return resultMap;
+            }
+
+            if (StringUtils.isBlank(orginIdStr)) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "request param orginId lack");
+                return resultMap;
+            }
+
+            Page<SelfPubRankDTO> selfPubRankDTOPage = wxService.queryWechatSelfPubRankList(orginIdStr, dayType, pageNum, pageSize, sortName, sortBy);
+            resultMap.put("totalCount", selfPubRankDTOPage.getTotal());
+            resultMap.put("totalPage", selfPubRankDTOPage.getPages());
+            resultMap.put("currentPageNum", selfPubRankDTOPage.getPageNum());
+            resultMap.put("data", selfPubRankDTOPage.getResult());
             return resultMap;
         } catch (NumberFormatException e) {
             e.printStackTrace();

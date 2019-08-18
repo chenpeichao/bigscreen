@@ -16,6 +16,7 @@
         <result column="day_type" property="dayType" jdbcType="INTEGER"/>
     </resultMap>
 
+    <!-- 查询公众号榜单 -->
     <select id="findPubRankByPubIdListAndParam" resultType="com.hubpd.bigscreen.dto.PubRankDTO"
             parameterType="java.util.Map">
         SELECT
@@ -53,6 +54,87 @@
                 order by impact_index DESC, effectPubTable.wx_id ASC
             </otherwise>
         </choose>
+    </select>
+
+    <!-- 查询自有公众号榜单 -->
+    <select id="findSelfPubRankByPubIdListAndParam" resultType="com.hubpd.bigscreen.dto.SelfPubRankDTO"
+            parameterType="java.util.Map">
+        SELECT
+        tpa.wx_name as 'wxName',
+        tpa.wx_id as 'wxId',
+        IFNULL(tpr.read_total, 0) AS 'articleReadNum',
+        IFNULL(tpr.like_total, 0) AS 'articleLikeNum',
+        IFNULL(tpr.tmp.newSum, 0) AS 'newSum',
+        IFNULL(tmp.cancelSum, 0) AS 'cancelSum',
+        IFNULL(tmp.cumulateUser, 0) AS 'cumulateUser',
+        #{dayType} AS 'dayType'
+        FROM t_pub_account tpa
+        LEFT JOIN t_pub_rank tpr ON tpr.day_type = #{dayType} AND tpr.pub_account_id = tpa.id
+        LEFT JOIN (SELECT
+        us.new_sum AS 'newSum',
+        us.cancel_sum AS 'cancelSum',
+        us2.cumulate_user AS 'cumulateUser',
+        us2.pub_account_id AS 'pubAccountId'
+        FROM (SELECT
+        pub_account_id,
+        SUM(new_user) AS 'new_sum',
+        SUM(cancel_user) AS 'cancel_sum'
+        FROM t_get_user_summary
+        <![CDATA[
+        WHERE ref_date >= #{startDate}
+        AND ref_date <=  #{endDate}
+         ]]>
+        <if test="pubAccountIdList!=null and pubAccountIdList.size() > 0">
+            AND pub_account_id in
+            <foreach collection="pubAccountIdList" item="pubAccountId"
+                     index="index" open="(" close=")" separator=",">
+                #{pubAccountId}
+            </foreach>
+        </if>
+        GROUP BY pub_account_id) us
+        RIGHT JOIN (SELECT
+        cum1.pub_account_id,
+        cum1.ref_date,
+        cum2.cumulate_user
+        FROM (SELECT
+        pub_account_id,
+        MAX(ref_date) AS 'ref_date'
+        FROM t_get_user_cumulate
+        <![CDATA[
+        WHERE ref_date >= #{startDate}
+        AND ref_date <=  #{endDate}
+         ]]>
+        <if test="pubAccountIdList!=null and pubAccountIdList.size() > 0">
+            AND pub_account_id in
+            <foreach collection="pubAccountIdList" item="pubAccountId"
+                     index="index" open="(" close=")" separator=",">
+                #{pubAccountId}
+            </foreach>
+        </if>
+        GROUP BY pub_account_id) cum1
+        LEFT JOIN t_get_user_cumulate cum2
+        ON cum1.pub_account_id = cum2.pub_account_id
+        AND cum1.ref_date = cum2.ref_date) us2
+        ON us.pub_account_id = us2.pub_account_id) tmp
+        ON tmp.pubAccountId = tpa.id
+        <if test="pubAccountIdList!=null and pubAccountIdList.size() > 0">
+            <where>
+                AND tpa.id in
+                <foreach collection="pubAccountIdList" item="pubAccountId"
+                         index="index" open="(" close=")" separator=",">
+                    #{pubAccountId}
+                </foreach>
+            </where>
+        </if>
+        <choose>
+            <when test="sortName != null and sortName != '' and sortBy != null and sortBy != ''">
+                order by ${sortName} ${sortBy}, tpa.wx_id ASC
+            </when>
+            <otherwise>
+                order by cumulateuser DESC, tpa.wx_id ASC
+            </otherwise>
+        </choose>
+
     </select>
 
     <insert id="insert" parameterType="com.hubpd.bigscreen.bean.weishu_pdmi.PubRank">

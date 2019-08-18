@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.hubpd.bigscreen.bean.weishu_pdmi.PubAccount;
 import com.hubpd.bigscreen.bean.weishu_pdmi.PubAccountWithBLOBs;
 import com.hubpd.bigscreen.dto.PubRankDTO;
+import com.hubpd.bigscreen.dto.SelfPubRankDTO;
 import com.hubpd.bigscreen.mapper.weishu_pdmi.PubAccountMapper;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.weishu_pdmi.PubRankService;
@@ -270,5 +271,37 @@ public class WXServiceImpl implements WXService {
             pubRankDTOPage = pubRankService.findPubRankByPubIdListAndParam(pubAccountIdListByUserIdList, dayType, sortName, sortBy);
         }
         return pubRankDTOPage;
+    }
+
+    /**
+     * 查询指定天范围的自有微信榜单数据列表
+     *
+     * @param orginIdStr 租户id
+     * @param dayType    查询日期范围，现在只支持7/30
+     * @param pageNum    页码
+     * @param pageSize   每页显示条数
+     * @param sortName   排序字段
+     * @param sortBy     升序/降序
+     * @return
+     */
+    public Page<SelfPubRankDTO> queryWechatSelfPubRankList(String orginIdStr, Integer dayType,
+                                                           Integer pageNum, Integer pageSize, String sortName, String sortBy) {
+        // 1、查询uar环境中指定机构下的用户id列表
+        List<String> uarBasicUserIdListByOrginId = uarBasicUserService.findUarBasicUserIdListByOrginId(orginIdStr);
+
+        // 2、根据用户id列表查询其对应的公众号列表（0:全部；1:自有；2:关注）
+        List<Integer> pubAccountIdListByUserIdList = new ArrayList<Integer>();
+        if (null != uarBasicUserIdListByOrginId && uarBasicUserIdListByOrginId.size() > 0) {
+            pubAccountIdListByUserIdList = weiShuPdmiUserService.findPubAccountIdListByUserIdList(uarBasicUserIdListByOrginId, 1);
+        }
+        // 2.1、对于机构对应的用户以及公众号进行打印
+        logger.info("在【" + DateUtils.getDateStrByDate(new Date(), "yyyy-MM-dd HH:mm:ss") + "】查询机构id为【" + orginIdStr + "】" + "对应用户id【" + uarBasicUserIdListByOrginId.toString() + "】，对应自有公众号id为【" + pubAccountIdListByUserIdList.toString() + "】");
+
+        PageHelper.startPage(pageNum, pageSize);
+        Page<SelfPubRankDTO> selfPubRankDTOPage = new Page<>();
+        if (null != pubAccountIdListByUserIdList && pubAccountIdListByUserIdList.size() > 0) {
+            selfPubRankDTOPage = pubRankService.findSelfPubRankByPubIdListAndParam(pubAccountIdListByUserIdList, dayType, sortName, sortBy);
+        }
+        return selfPubRankDTOPage;
     }
 }
