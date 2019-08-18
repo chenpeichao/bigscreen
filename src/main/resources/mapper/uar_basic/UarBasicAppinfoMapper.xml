@@ -43,6 +43,15 @@
         FROM t_appinfo ta
         WHERE ta.appmedia = #{orgId,jdbcType=VARCHAR}
     </select>
+
+    <!-- 根据机构id，查询其下对应的所有网站和移动应用的appaccount -->
+    <select id="findAppaccountListByOrgIdAndAppType" resultType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo"
+            parameterType="map">
+        SELECT ta.*
+        FROM t_appinfo ta
+        WHERE ta.appmedia = #{orgId,jdbcType=VARCHAR} and ta.apptype = #{appType}
+    </select>
+
     <!-- 根据应用at，查询应用详情 -->
     <select id="findAppInfoByAppAccountOrAppAccount2" resultType="com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo"
             parameterType="java.lang.String">
@@ -59,7 +68,6 @@
             AND ta.apptype = #{appType}
         </if>
     </select>
-
 
     <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer">
         select

@@ -57,8 +57,8 @@ public class EveryDayExecuteOriginIdSchedule {
     }
 
     //对uar_basic中的t_task_origin中的机构的用户画像数据进行缓存(年龄、性别、地域(全省份))
-    @Scheduled(fixedRate = 1000 * 60 * 50)
-//    @Scheduled(cron = "0 0 6 * * ?")
+//    @Scheduled(fixedRate = 1000 * 60 * 50)
+    @Scheduled(cron = "0 0 6 * * ?")
     public void addUserPortraitCacheTask() {
         //查询大屏中缓存的所有有效的组织机构id列表
         List<String> allOriginIdList = uarBasicUserService.findAllOriginIdListInBigscreen();

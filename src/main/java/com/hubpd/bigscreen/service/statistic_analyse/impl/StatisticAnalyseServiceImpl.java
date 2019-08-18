@@ -8,19 +8,33 @@ import com.hubpd.bigscreen.dto.CrtOriginAndTraceCountDTO;
 import com.hubpd.bigscreen.dto.UarAppkeyAndCrtMediaIdDTO;
 import com.hubpd.bigscreen.mapper.uar_statistic.UarStatisticWebAtDayMapper;
 import com.hubpd.bigscreen.service.statistic_analyse.StatisticAnalyseService;
+import com.hubpd.bigscreen.service.uar_basic.MediaService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
-import com.hubpd.bigscreen.utils.Constants;
-import com.hubpd.bigscreen.utils.DateUtils;
-import com.hubpd.bigscreen.utils.HttpUtils;
-import com.hubpd.bigscreen.utils.Md5Utils;
+import com.hubpd.bigscreen.utils.*;
 import com.hubpd.bigscreen.vo.StatisticAnalyseTmpVO;
 import com.hubpd.bigscreen.vo.StatisticAnalyseVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -38,6 +52,8 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
     private UarBasicUserService uarBasicUserService;
     @Autowired
     private UarBasicAppinfoService uarBasicAppinfoService;
+    @Autowired
+    private MediaService mediaService;
 
     @Autowired
     private UarStatisticWebAtDayMapper uarStatisticWebAtDayMapper;
@@ -219,5 +235,218 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         params.put("at", appkey);
         params.put("day", searchDateStr);
         return uarStatisticWebAtDayMapper.selectPVAndUVByAtAndDateApp(params);
+    }
+
+    /**
+     * 根据租户id查询指定应用类型的人们文章信息
+     *
+     * @param orginId          租户id
+     * @param appFlag          应用标识(1:网站；2:客户端)
+     * @param startPublishTime 查询起始时间(yyyyMMdd)
+     * @param endPublishTime   查询截止时间(yyyyMMdd)
+     * @return
+     */
+    public Map<String, Object> getHotArticleRank(String orginId, Integer appFlag, String startPublishTime, String endPublishTime, Integer topN) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        if (null == mediaService.findMediaByOrgId(orginId)) {
+            resultMap.put("code", ErrorCode.ERROR_CODE_NOT_FOUND_MEDIA_ID);
+            resultMap.put("message", "系统中不存在指定机构");
+            return resultMap;
+        }
+
+        Map<String, List<Map<String, Object>>> resultStatisticTitleAndUrlMapList = new HashMap<String, List<Map<String, Object>>>();
+
+        List<Map<String, Object>> resultTitleAndUrlMapList = new ArrayList<Map<String, Object>>();
+        Map<String, List<String>> appKeySetMap = new HashMap<String, List<String>>();
+        switch (appFlag) {
+            case 1:         //网站
+//                appKeySet = uarBasicAppinfoService.getAppKeyByLesseeIdAndAppType(orginId, Constants.UAR_APP_TYPE_WEB);
+//                logger.info("机构为【"+orginId+"】的网站appKey的集合为" + appKeySet);
+//                if(null != appKeySet && appKeySet.size() > 0) {
+//                    try {
+//                        for(String appKey : appKeySet) {
+//                            Set<String> appKeySetTmp = new HashSet<String>();
+//                            appKeySetTmp.add(appKey);
+//                            resultTitleAndUrlMapList = getTopNArticleInWebAndApp(appKeySetTmp, 1000, Long.parseLong(startPublishTime), Long.parseLong(endPublishTime), pageNum, pageSize);
+//                        }
+//                    } catch (Exception e) {
+//                        logger.error(e);
+//                    }
+//                }
+
+                appKeySetMap = uarBasicAppinfoService.findAppaccountListByOrgId(orginId, Constants.UAR_APP_TYPE_WEB);
+                logger.info("appKey的集合为" + appKeySetMap.values().toString());
+                if (null != appKeySetMap && appKeySetMap.size() > 0) {
+                    try {
+                        for (Map.Entry<String, List<String>> entries : appKeySetMap.entrySet()) {
+                            String appName = entries.getKey() + "_" + entries.getValue().get(0);
+                            List<String> appKeyList = entries.getValue();
+
+                            Set<String> appKeySet = new HashSet<String>(appKeyList);
+                            resultTitleAndUrlMapList = getTopNArticleInWebAndApp(appKeySet, Long.parseLong(startPublishTime), Long.parseLong(endPublishTime), topN);
+                            resultStatisticTitleAndUrlMapList.put(appName, resultTitleAndUrlMapList);
+                        }
+                    } catch (Exception e) {
+                        logger.error(e);
+                    }
+                }
+                break;
+            case 2:         //客户端
+                appKeySetMap = uarBasicAppinfoService.findAppaccountListByOrgId(orginId, Constants.UAR_APP_TYPE_APP);
+                logger.info("appKey的集合为" + appKeySetMap.values().toString());
+                if (null != appKeySetMap && appKeySetMap.size() > 0) {
+                    try {
+                        for (Map.Entry<String, List<String>> entries : appKeySetMap.entrySet()) {
+//                            String appName = entries.getKey();
+                            String appName = entries.getKey() + "_" + entries.getValue().get(0);
+                            List<String> appKeyList = entries.getValue();
+
+                            Set<String> appKeySet = new HashSet<String>(appKeyList);
+                            resultTitleAndUrlMapList = getTopNArticleInWebAndApp(appKeySet, Long.parseLong(startPublishTime), Long.parseLong(endPublishTime), topN);
+                            resultStatisticTitleAndUrlMapList.put(appName, resultTitleAndUrlMapList);
+                        }
+                    } catch (Exception e) {
+                        logger.error(e);
+                    }
+                }
+                break;
+        }
+
+        resultMap.put("code", 0);
+        resultMap.put("data", resultStatisticTitleAndUrlMapList);
+        return resultMap;
+    }
+
+    private List<Map<String, Object>> getTopNArticleInWebAndApp(Set<String> atSet, Long from, Long to, Integer topN) {
+        List<Map<String, Object>> titleUrlMapList = new ArrayList<Map<String, Object>>();
+
+        TransportClient client = null;
+        JSONObject resultJsonObj = new JSONObject();
+        try {
+            client = StatisticESClient.getClientIns();
+        } catch (IOException e) {
+            logger.error("es配置信息错误");
+            e.printStackTrace();
+            return titleUrlMapList;
+        }
+        try {
+            TermsBuilder root1 = AggregationBuilders.terms("item_id")
+                    .field("item_id").size(topN);          // fmyblack: size设为0才能获得准确值，但会损耗性能
+
+            List<QueryBuilder> atQueryBuilderList = new ArrayList<QueryBuilder>();
+            for (String appKey : atSet) {
+                QueryBuilder queryBuilder = QueryBuilders.termQuery("at", appKey);
+                atQueryBuilderList.add(queryBuilder);
+            }
+            SearchRequestBuilder srb = client
+                    .prepareSearch(ESConfigConstants.ES_STATISTIC_INDEX_ITEM_STATISTIC)
+                    .setTypes(ESConfigConstants.ES_STATISTIC_TYPE_ITEM_BASIC_STATISTIC)
+                    .setQuery(
+                            filterQuery(shouldQuery(atQueryBuilderList),
+                                    dayRange(from, to)))
+                    .addAggregation(
+                            root1.subAggregation(sumAggs("pv", "pv"))
+                                    .order(Terms.Order.aggregation("pv", false)))
+                    .setSize(0);
+            SearchResponse sr = srb.execute().actionGet();
+            logger.info("查询聚合信息的pv排序=>" + srb.toString()
+                    + "\r\n cost" + sr.getTook());
+
+            Map<String, Aggregation> map = sr.getAggregations().asMap();
+            StringTerms terms = (StringTerms) map.get("item_id");
+            // 此处缓存部分结果，若查询为0条也缓存
+            List<Terms.Bucket> resultList = terms.getBuckets();
+
+            for (int i = 0; i < topN && i < resultList.size(); i++) {
+                Terms.Bucket bucket = resultList.get(i);
+                String key = (String) bucket.getKey();
+                InternalSum pv = bucket.getAggregations().get("pv");
+                int pvValue = (int) pv.getValue();
+                logger.info("item_id:" + key + "====>pv:" + pvValue);
+                // 修改为先走缓存获取内容详情
+                Map<String, Object> subMap = getItemById(key);
+                if (null != subMap && null != subMap.get("uri") && null != subMap.get("tt")) {
+                    resultJsonObj = new JSONObject();
+                    resultJsonObj.put("url", (String) subMap.get("uri"));
+                    resultJsonObj.put("title", (String) subMap.get("tt"));
+                    //暂时不需要下面两个字段
+                    resultJsonObj.put("articleUniqueKey", key);
+                    resultJsonObj.put("pv", pvValue);
+//                    resultJsonObj.put("index", i+1);
+                    titleUrlMapList.add(resultJsonObj);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("查询topN文章数发生未知错误=》", e);
+            e.printStackTrace();
+        } finally {
+            return titleUrlMapList;
+        }
+    }
+
+    /**
+     * 通过itemid获取内容详情
+     *
+     * @param itemId
+     * @return
+     */
+    public Map<String, Object> getItemById(String itemId) {
+        if (itemId == null || "".equals(itemId)) {
+            return null;
+        }
+        Map<String, Object> subMap = new HashMap<String, Object>();
+        try {
+            Client client = StatisticESClient.getClientIns();
+            SearchRequestBuilder srb = client.prepareSearch(ESConfigConstants.ES_STATISTIC_INDEX_ITEM_STATISTIC)
+                    .setTypes(ESConfigConstants.ES_STATISTIC_TYPE_ITEM_BASIC_STATISTIC)
+                    .setQuery(filterQuery(termQuery("item_id", itemId)))
+                    .addSort("pv", SortOrder.DESC)
+                    .setSize(1);
+            logger.info("根据item_id查询文章的title和url信息：" + srb.toString());
+
+            SearchResponse res = srb.execute().actionGet();
+            System.out.println(res.getTookInMillis());
+            subMap = res.getHits().iterator().next()
+                    .getSource();
+            return subMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("itemId为【" + itemId + "】查询标题和链接失败");
+            return subMap;
+        }
+    }
+
+    private QueryBuilder filterQuery(QueryBuilder... querys) {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        for (QueryBuilder query : querys) {
+            boolQuery.filter(query);
+        }
+        return boolQuery;
+    }
+
+    private static MetricsAggregationBuilder sumAggs(String name, String field) {
+        return AggregationBuilders.sum(name).field(field);
+    }
+
+    // 查询时间范围
+    private QueryBuilder dayRange(long from, long to) {
+        return QueryBuilders.rangeQuery("day").gte(from).lte(to);
+    }
+
+    private static QueryBuilder termQuery(String name, String value) {
+        return QueryBuilders.termQuery(name, value);
+    }
+
+    /*
+     * 或查询
+     */
+    private static QueryBuilder shouldQuery(List<QueryBuilder> queryBuilderList) {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        for (QueryBuilder query : queryBuilderList) {
+            boolQuery.should(query);
+        }
+        boolQuery.minimumNumberShouldMatch(1);
+        return boolQuery;
     }
 }

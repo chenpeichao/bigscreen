@@ -59,6 +59,15 @@ public class Constants {
      */
     public static Integer USER_PROFILE_REGIN_DATA_LEVEL_MYSQL;
 
+    /**
+     * 所有app应用标识1：网站、2：客户端
+     */
+    public static String PARAM_APP_FLAG_ALL;
+    /**
+     * 网站和微信热门文章最大文章数
+     */
+    public static Integer STATISTIC_APP_AND_WEB_HOT_ARTICLE_TOP_NUM;
+
     @Value("${data_back_begin_day_num}")
     public void setDataBackBeginDayNum(Integer dataBackBeginDayNum) {
         this.DATA_BACK_BEGIN_DAY_NUM = dataBackBeginDayNum;
@@ -132,6 +141,16 @@ public class Constants {
     @Value("${user_profile_regin_data_level_mysql}")
     public void setUserProfileReginDataLevelMysql(Integer userProfileReginDataLevelMysql) {
         this.USER_PROFILE_REGIN_DATA_LEVEL_MYSQL = userProfileReginDataLevelMysql;
+    }
+
+    @Value("${param_app_flag_all}")
+    public void setParamAppFlagAll(String paramAppFlagAll) {
+        this.PARAM_APP_FLAG_ALL = paramAppFlagAll;
+    }
+
+    @Value("${statistic_app_and_web_hot_article_top_num}")
+    public void setStatisticAppAndWebHotArticleTopNum(Integer statisticAppAndWebHotArticleTopNum) {
+        this.STATISTIC_APP_AND_WEB_HOT_ARTICLE_TOP_NUM = statisticAppAndWebHotArticleTopNum;
     }
 
 }

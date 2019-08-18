@@ -22,6 +22,16 @@ public interface UarBasicAppinfoService {
     public Map<String, List<String>> findAppaccountListByOrgId(String orgId);
 
     /**
+     * 根据机构id，查询其下对应的所有网站和移动应用的appaccount(即应用标识at)（返回结果为map<应用中文名，(应用appaccount，当为移动应用时为，Android和ios的appkey)>）
+     *
+     * @param orgId 机构id
+     * @param appType 应用类型(1:网站；2:客户端)
+     *
+     * @return
+     */
+    public Map<String, List<String>> findAppaccountListByOrgId(String orgId, Integer appType);
+
+    /**
      * 根据应用at，查询应用详情
      *
      * @param appaccount 应用at
