@@ -130,7 +130,7 @@ public class StatisticAnalyseController {
 
         //appFlag未传递时，以及格式不为1(网站),2(客户端)
         Pattern appFlagPattern = Pattern.compile("^[" + Constants.PARAM_APP_FLAG_ALL + "]$");
-        Integer appFlag = 1;
+        Integer appFlag = Constants.UAR_APP_TYPE_WEB;
         if (StringUtils.isBlank(appFlagStr)) {
             resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
             resultMap.put("message", "request param appFlag lack");
@@ -207,6 +207,96 @@ public class StatisticAnalyseController {
 
         try {
             return statisticAnalyseService.getHotArticleRank(orginIdStr, appFlag, startPublishTime.replace("-", ""), endPublishTime.replace("-", ""), topN);
+        } catch (Exception e) {
+            logger.error("getStatisticAnalyse运营分析接口调用失败-发生未知错误", e);
+            resultMap.put("code", 0);
+            resultMap.put("message", "接口调用失败，请重试！！");
+            return resultMap;
+        }
+    }
+
+    /**
+     * 运营分析--根据机构id和查询时间查询pv、uv以及crt的相关原创数和转载数---默认查询昨天
+     *
+     * @param request
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/getTotalUserByOriginId")
+    public Map<String, Object> getTotalUserByOriginId(HttpServletRequest request, HttpServletResponse response) {
+        // 解决跨域问题
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        logger.info("调用/statistic/webGeneralView接口request param 【" + request.getQueryString() + "】");
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String orginIdStr = StringUtils.isNotBlank(request.getParameter("orginId")) ? request.getParameter("orginId").trim() : request.getParameter("orginId");
+        String appFlagStr = StringUtils.isNotBlank(request.getParameter("appFlag")) ? request.getParameter("appFlag").trim() : request.getParameter("appFlag");
+        String searchBeginDateStr = StringUtils.isNotBlank(request.getParameter("startSearchDate")) ? request.getParameter("startSearchDate").trim() : request.getParameter("startSearchDate");
+        String searchEndDateStr = StringUtils.isNotBlank(request.getParameter("endSearchDate")) ? request.getParameter("endSearchDate").trim() : request.getParameter("endSearchDate");
+
+        if (StringUtils.isBlank(orginIdStr)) {
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+            resultMap.put("message", "request param orginId lack");
+            return resultMap;
+        }
+
+        //appFlag未传递时，以及格式不为1(网站),2(客户端)
+        Pattern appFlagPattern = Pattern.compile("^[" + Constants.PARAM_APP_FLAG_ALL + "]$");
+        Integer appFlag = Constants.UAR_APP_TYPE_WEB;
+        if (StringUtils.isBlank(appFlagStr)) {
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+            resultMap.put("message", "request param appFlag lack");
+            return resultMap;
+        } else if (!appFlagPattern.matcher(appFlagStr).matches()) {
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_ERROR_PATTERN);
+            resultMap.put("message", "request param appFlag value is wrong");
+            return resultMap;
+        } else {
+            try {
+                appFlag = Integer.parseInt(appFlagStr);
+            } catch (NumberFormatException e) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_ERROR_PATTERN);
+                resultMap.put("message", "request param appFlag value is wrong");
+                return resultMap;
+            }
+        }
+
+        //默认查询前8天到昨天的数据
+//        String endPublishTime = new SimpleDateFormat("yyyy-MM-dd").format((new DateTime()).minusDays(1).withHourOfDay(23).
+//                withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999).toDate());
+//        String startPublishTime = new SimpleDateFormat("yyyy-MM-dd").format((new DateTime()).minusDays(7).withHourOfDay(0).
+//                withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).toDate());
+        String startPublishTime = "";
+        String endPublishTime = "";
+
+        Long searchBeginDay = 0l;
+        Long searchEndDay = 0l;
+        if (StringUtils.isNotBlank(searchBeginDateStr)) {
+            startPublishTime = searchBeginDateStr.trim();
+            try {
+                new SimpleDateFormat("yyyy-MM-dd").parse(startPublishTime);
+                searchBeginDay = Long.parseLong(startPublishTime.replace("-", ""));
+            } catch (ParseException e) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "起始时间格式错误【yyyy-MM-dd】");
+                return resultMap;
+            }
+        }
+        if (StringUtils.isNotBlank(searchEndDateStr)) {
+            endPublishTime = searchEndDateStr.trim();
+            try {
+                new SimpleDateFormat("yyyy-MM-dd").parse(endPublishTime);
+                searchEndDay = Long.parseLong(endPublishTime.replace("-", ""));
+            } catch (ParseException e) {
+                resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
+                resultMap.put("message", "截止时间格式错误【yyyy-MM-dd】");
+                return resultMap;
+            }
+        }
+
+        try {
+            return statisticAnalyseService.getTotalUserByOriginId(orginIdStr, appFlag, searchBeginDay, searchEndDay);
         } catch (Exception e) {
             logger.error("getStatisticAnalyse运营分析接口调用失败-发生未知错误", e);
             resultMap.put("code", 0);

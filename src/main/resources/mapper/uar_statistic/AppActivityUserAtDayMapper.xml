@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_statistic.AppActivityUserAtDayMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDay">
+        <id column="at" property="at" jdbcType="VARCHAR"/>
+        <id column="day" property="day" jdbcType="INTEGER"/>
+        <result column="activity_user" property="activityUser" jdbcType="INTEGER"/>
+        <result column="total_user" property="totalUser" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    at, day, activity_user, total_user
+  </sql>
+
+    <select id="getTotalUserByAppKeySetAndSearchDay" resultType="java.lang.Long" parameterType="map">
+        SELECT
+        IFNULL(SUM(aaa.total_user), 0) as 'totalUser'
+        FROM app_activity_user_at_day aaa
+        RIGHT JOIN (SELECT
+        AT,
+        MAX(DAY) AS maxday
+        FROM app_activity_user_at_day aauad
+        WHERE aauad.at IN
+        <foreach collection="appKeySet" item="appKey"
+                 index="index" open="(" close=")" separator=",">
+            #{appKey}
+        </foreach>
+        <if test="searchDay !=null and searchDay > 0">
+            <![CDATA[
+        and aauad.day <= #{searchDay}
+    ]]>
+        </if>
+        GROUP BY aauad.at) tmp
+        ON aaa.day = tmp.maxday
+        AND tmp.at = aaa.at
+    </select>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap"
+            parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDayKey">
+        select
+        <include refid="Base_Column_List"/>
+        from app_activity_user_at_day
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDayKey">
+    delete from app_activity_user_at_day
+    where at = #{at,jdbcType=VARCHAR}
+      and day = #{day,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDay">
+    insert into app_activity_user_at_day (at, day, activity_user, 
+      total_user)
+    values (#{at,jdbcType=VARCHAR}, #{day,jdbcType=INTEGER}, #{activityUser,jdbcType=INTEGER}, 
+      #{totalUser,jdbcType=INTEGER})
+  </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDay">
+        insert into app_activity_user_at_day
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="at != null">
+                at,
+            </if>
+            <if test="day != null">
+                day,
+            </if>
+            <if test="activityUser != null">
+                activity_user,
+            </if>
+            <if test="totalUser != null">
+                total_user,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="at != null">
+                #{at,jdbcType=VARCHAR},
+            </if>
+            <if test="day != null">
+                #{day,jdbcType=INTEGER},
+            </if>
+            <if test="activityUser != null">
+                #{activityUser,jdbcType=INTEGER},
+            </if>
+            <if test="totalUser != null">
+                #{totalUser,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDay">
+        update app_activity_user_at_day
+        <set>
+            <if test="activityUser != null">
+                activity_user = #{activityUser,jdbcType=INTEGER},
+            </if>
+            <if test="totalUser != null">
+                total_user = #{totalUser,jdbcType=INTEGER},
+            </if>
+        </set>
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppActivityUserAtDay">
+    update app_activity_user_at_day
+    set activity_user = #{activityUser,jdbcType=INTEGER},
+      total_user = #{totalUser,jdbcType=INTEGER}
+    where at = #{at,jdbcType=VARCHAR}
+      and day = #{day,jdbcType=INTEGER}
+  </update>
+</mapper>

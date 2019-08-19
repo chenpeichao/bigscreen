@@ -7,7 +7,9 @@ import com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay;
 import com.hubpd.bigscreen.dto.CrtOriginAndTraceCountDTO;
 import com.hubpd.bigscreen.dto.UarAppkeyAndCrtMediaIdDTO;
 import com.hubpd.bigscreen.mapper.uar_statistic.UarStatisticWebAtDayMapper;
+import com.hubpd.bigscreen.service.statistic_analyse.AppActivityUserAtDayService;
 import com.hubpd.bigscreen.service.statistic_analyse.StatisticAnalyseService;
+import com.hubpd.bigscreen.service.statistic_analyse.WebAtCLNDayService;
 import com.hubpd.bigscreen.service.uar_basic.MediaService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
@@ -32,6 +34,7 @@ import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -57,6 +60,13 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
 
     @Autowired
     private UarStatisticWebAtDayMapper uarStatisticWebAtDayMapper;
+    @Autowired
+    private WebAtCLNDayService webAtCLNDayService;
+    @Autowired
+    private AppActivityUserAtDayService appActivityUserAtDayService;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 根据机构id和查询时间查询pv、uv以及crt的相关原创数和转载数---默认查询昨天
@@ -317,6 +327,56 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         resultMap.put("data", resultStatisticTitleAndUrlMapList);
         return resultMap;
     }
+
+    /**
+     * 根据租户id查询指定应用类型的指定时间的总用户量
+     *
+     * @param orginId        租户id
+     * @param appFlag        应用标识(1：网站；2：客户端)
+     * @param searchBeginDay 查询起始天
+     * @param searchEndDay   查询截止天
+     * @return
+     */
+    public Map<String, Object> getTotalUserByOriginId(String orginId, Integer appFlag, Long searchBeginDay, Long searchEndDay) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        Set<String> appKeyByLesseeIdAndAppType = new HashSet<String>();
+        if (Constants.UAR_APP_TYPE_APP.equals(appFlag)) {
+            appKeyByLesseeIdAndAppType = uarBasicAppinfoService.getAppKeyByLesseeIdAndAppType(orginId, Constants.UAR_APP_TYPE_APP);
+        } else {
+            appKeyByLesseeIdAndAppType = uarBasicAppinfoService.getAppKeyByLesseeIdAndAppType(orginId, Constants.UAR_APP_TYPE_WEB);
+        }
+
+        Map<String, Object> dataMap = new HashMap<String, Object>();
+
+        if (null == appKeyByLesseeIdAndAppType || appKeyByLesseeIdAndAppType.size() == 0) {
+            resultMap.put("code", 0);
+            resultMap.put("data", dataMap);
+            return resultMap;
+        }
+        logger.info("机构【" + orginId + "】的appKey的集合为" + appKeyByLesseeIdAndAppType.toString());
+
+        Map<String, Long> totalUserMap = new HashMap<String, Long>();
+        if (Constants.UAR_APP_TYPE_APP.equals(appFlag)) {
+            //客户端的需要先查询截止日期的总用户，在查询开始日期的总用户数
+            Long beginTotalUser = appActivityUserAtDayService.getTotalUserByAppKeySetAndSearchDay(appKeyByLesseeIdAndAppType, searchBeginDay);
+            Long endTotalUser = appActivityUserAtDayService.getTotalUserByAppKeySetAndSearchDay(appKeyByLesseeIdAndAppType, searchEndDay);
+            if (null == searchBeginDay || searchBeginDay == 0) {
+                totalUserMap.put("totalUser", endTotalUser);
+            } else {
+                totalUserMap.put("totalUser", endTotalUser - beginTotalUser);
+            }
+        } else {
+            totalUserMap.put("totalUser", webAtCLNDayService.getTotalUserByOriginId(appKeyByLesseeIdAndAppType, searchBeginDay, searchEndDay));
+        }
+
+        resultMap.put("code", 0);
+        resultMap.put("data", totalUserMap);
+
+        return resultMap;
+    }
+
+
 
     private List<Map<String, Object>> getTopNArticleInWebAndApp(Set<String> atSet, Long from, Long to, Integer topN) {
         List<Map<String, Object>> titleUrlMapList = new ArrayList<Map<String, Object>>();

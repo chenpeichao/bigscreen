@@ -29,4 +29,15 @@ public interface StatisticAnalyseService {
      * @return
      */
     public Map<String, Object> getHotArticleRank(String orginId, Integer appFlag, String startPublishTime, String endPublishTime, Integer topN);
+
+    /**
+     * 根据租户id查询指定应用类型的指定时间的统计信息(pv/uv)
+     *
+     * @param orginId        租户id
+     * @param appFlag        应用标识(1：网站；2：客户端)
+     * @param searchBeginDay 查询起始天
+     * @param searchEndDay   查询截止天
+     * @return
+     */
+    public Map<String, Object> getTotalUserByOriginId(String orginId, Integer appFlag, Long searchBeginDay, Long searchEndDay);
 }

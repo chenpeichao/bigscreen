@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_basic.MediaMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_basic.Media">
+        <result column="mediaid" property="mediaid" jdbcType="CHAR"/>
+        <result column="medianame" property="medianame" jdbcType="CHAR"/>
+        <result column="status" property="status" jdbcType="BIT"/>
+        <result column="sys_type" property="sysType" jdbcType="BIT"/>
+    </resultMap>
+
+    <!-- 根据租户id以及应用类型获取应用所有的appkey -->
+    <select id="findAllOriginIdListInBigscreen" parameterType="java.lang.Integer" resultType="java.lang.String">
+    SELECT tm.mediaid mediaId FROM t_media tm WHERE tm.sys_type = #{sysType}
+  </select>
+    <!-- 根据系统类型和机构id查询是否存在此机构 -->
+    <select id="findMediaByOrgIdAndSystype" parameterType="map" resultType="com.hubpd.bigscreen.bean.uar_basic.Media">
+    SELECT * FROM t_media tm WHERE tm.sys_type = #{sysType} AND tm.mediaid = #{orgId} limit 0, 1
+  </select>
+
+    <!-- 根据系统类型和机构id查询是否存在此机构 -->
+    <select id="findMediaByOrgId" parameterType="map" resultType="com.hubpd.bigscreen.bean.uar_basic.Media">
+    SELECT * FROM t_media tm WHERE tm.mediaid = #{orgId} limit 0, 1
+  </select>
+
+
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_basic.Media">
+    insert into t_media (mediaid, medianame, status, 
+      sys_type)
+    values (#{mediaid,jdbcType=CHAR}, #{medianame,jdbcType=CHAR}, #{status,jdbcType=BIT}, 
+      #{sysType,jdbcType=BIT})
+  </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_basic.Media">
+        insert into t_media
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="mediaid != null">
+                mediaid,
+            </if>
+            <if test="medianame != null">
+                medianame,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="sysType != null">
+                sys_type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="mediaid != null">
+                #{mediaid,jdbcType=CHAR},
+            </if>
+            <if test="medianame != null">
+                #{medianame,jdbcType=CHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=BIT},
+            </if>
+            <if test="sysType != null">
+                #{sysType,jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+</mapper>
