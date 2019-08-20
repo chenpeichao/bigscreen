@@ -34,7 +34,6 @@ import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -64,9 +63,6 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
     private WebAtCLNDayService webAtCLNDayService;
     @Autowired
     private AppActivityUserAtDayService appActivityUserAtDayService;
-
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 根据机构id和查询时间查询pv、uv以及crt的相关原创数和转载数---默认查询昨天
@@ -265,7 +261,8 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
             return resultMap;
         }
 
-        Map<String, List<Map<String, Object>>> resultStatisticTitleAndUrlMapList = new HashMap<String, List<Map<String, Object>>>();
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+
 
         List<Map<String, Object>> resultTitleAndUrlMapList = new ArrayList<Map<String, Object>>();
         Map<String, List<String>> appKeySetMap = new HashMap<String, List<String>>();
@@ -290,12 +287,18 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
                 if (null != appKeySetMap && appKeySetMap.size() > 0) {
                     try {
                         for (Map.Entry<String, List<String>> entries : appKeySetMap.entrySet()) {
-                            String appName = entries.getKey() + "_" + entries.getValue().get(0);
+                            String appName = entries.getKey();
                             List<String> appKeyList = entries.getValue();
 
                             Set<String> appKeySet = new HashSet<String>(appKeyList);
                             resultTitleAndUrlMapList = getTopNArticleInWebAndApp(appKeySet, Long.parseLong(startPublishTime), Long.parseLong(endPublishTime), topN);
-                            resultStatisticTitleAndUrlMapList.put(appName, resultTitleAndUrlMapList);
+
+                            Map<String, Object> resultStatisticTitleAndUrlMapList = new HashMap<String, Object>();
+
+                            resultStatisticTitleAndUrlMapList.put("appName", appName);
+                            resultStatisticTitleAndUrlMapList.put("articleList", resultTitleAndUrlMapList);
+
+                            result.add(resultStatisticTitleAndUrlMapList);
                         }
                     } catch (Exception e) {
                         logger.error(e);
@@ -308,13 +311,17 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
                 if (null != appKeySetMap && appKeySetMap.size() > 0) {
                     try {
                         for (Map.Entry<String, List<String>> entries : appKeySetMap.entrySet()) {
-//                            String appName = entries.getKey();
-                            String appName = entries.getKey() + "_" + entries.getValue().get(0);
+                            String appName = entries.getKey();
                             List<String> appKeyList = entries.getValue();
 
                             Set<String> appKeySet = new HashSet<String>(appKeyList);
                             resultTitleAndUrlMapList = getTopNArticleInWebAndApp(appKeySet, Long.parseLong(startPublishTime), Long.parseLong(endPublishTime), topN);
-                            resultStatisticTitleAndUrlMapList.put(appName, resultTitleAndUrlMapList);
+
+                            Map<String, Object> resultStatisticTitleAndUrlMapList = new HashMap<String, Object>();
+                            resultStatisticTitleAndUrlMapList.put("appName", appName);
+                            resultStatisticTitleAndUrlMapList.put("articleList", resultTitleAndUrlMapList);
+
+                            result.add(resultStatisticTitleAndUrlMapList);
                         }
                     } catch (Exception e) {
                         logger.error(e);
@@ -324,7 +331,7 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         }
 
         resultMap.put("code", 0);
-        resultMap.put("data", resultStatisticTitleAndUrlMapList);
+        resultMap.put("data", result);
         return resultMap;
     }
 

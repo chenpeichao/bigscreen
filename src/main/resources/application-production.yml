@@ -32,10 +32,3 @@ uar_statistic:
     username: uar_db_user
     password: uar!9&jdpQGd
     driverClassName: com.mysql.jdbc.Driver
-
-# es画像生产环境库
-spring:
-  data:
-    elasticsearch: #ElasticsearchProperties
-      cluster-name: elasticsearch_uar
-      cluster-nodes: 10.101.67.5:9300

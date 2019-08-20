@@ -236,12 +236,12 @@ public class WXController {
             return resultMap;
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            resultMap.put("status", 0);
-            resultMap.put("msg", "请求参数格式错误");
+            resultMap.put("code", ErrorCode.ERROR_CODE_NOT_FOUND_MEDIA_ID);
+            resultMap.put("message", "请求参数格式错误");
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
-            resultMap.put("status", 0);
+            resultMap.put("code", ErrorCode.ERROR_CODE_NOT_FOUND_MEDIA_ID);
             resultMap.put("msg", "获取公众号榜单列表信息接口失败");
             return resultMap;
         }
@@ -320,13 +320,13 @@ public class WXController {
             return resultMap;
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            resultMap.put("status", 0);
-            resultMap.put("msg", "请求参数格式错误");
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_ERROR_PATTERN);
+            resultMap.put("message", "请求参数格式错误");
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
-            resultMap.put("status", 0);
-            resultMap.put("msg", "获取自有公众号榜单列表信息接口失败");
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_ERROR_PATTERN);
+            resultMap.put("message", "获取自有公众号榜单列表信息接口失败");
             return resultMap;
         }
     }
@@ -359,7 +359,7 @@ public class WXController {
             Integer pageNum = StringUtils.isBlank(pageNumStr) ? 1 : Integer.parseInt(pageNumStr.trim());
             Integer pageSize = StringUtils.isBlank(pageSizeStr) ? 10 : Integer.parseInt(pageSizeStr.trim());
             Integer headType = StringUtils.isBlank(headTypeStr) ? 0 : Integer.parseInt(headTypeStr.trim());
-            sortName = StringUtils.isBlank(sortName) ? "cumulateUser" : sortName.trim();    //默认根据累计关注人数字段排序
+            sortName = StringUtils.isBlank(sortName) ? "readNum" : sortName.trim();    //默认根据阅读数字段排序
             sortBy = StringUtils.isBlank(sortBy) ? "DESC" : sortBy.trim();              //默认为降序
 
             //排序集合封装，用于验证前台传递排序字段
@@ -447,13 +447,13 @@ public class WXController {
             return resultMap;
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            resultMap.put("status", 0);
-            resultMap.put("msg", "请求参数格式错误");
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_ERROR_PATTERN);
+            resultMap.put("message", "请求参数格式错误");
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
-            resultMap.put("status", 0);
-            resultMap.put("msg", "获取公众号文章列表接口失败");
+            resultMap.put("code", ErrorCode.ERROR_CODE_NOT_FOUND_MEDIA_ID);
+            resultMap.put("message", "获取公众号文章列表接口失败");
             return resultMap;
         }
     }

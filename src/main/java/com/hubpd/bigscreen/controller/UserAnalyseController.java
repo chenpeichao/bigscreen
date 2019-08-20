@@ -128,8 +128,8 @@ public class UserAnalyseController {
         try {
             return userAnalyseService.getUserAnalyseAllRegion(orginIdStr);
         } catch (Exception e) {
-            logger.error("channelRank频道排行接口调用失败-发生未知错误", e);
-            resultMap.put("code", 1000);
+            logger.error("用户画像全省份地域排行接口调用失败-发生未知错误", e);
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
             resultMap.put("message", "接口调用失败，请重试");
             return resultMap;
         }

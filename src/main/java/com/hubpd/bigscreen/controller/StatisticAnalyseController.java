@@ -102,7 +102,7 @@ public class StatisticAnalyseController {
     }
 
     /**
-     * 运营分析--根据机构id和查询时间查询pv、uv以及crt的相关原创数和转载数---默认查询昨天
+     * 热门文章
      *
      * @param request
      * @return
@@ -209,7 +209,7 @@ public class StatisticAnalyseController {
             return statisticAnalyseService.getHotArticleRank(orginIdStr, appFlag, startPublishTime.replace("-", ""), endPublishTime.replace("-", ""), topN);
         } catch (Exception e) {
             logger.error("getStatisticAnalyse运营分析接口调用失败-发生未知错误", e);
-            resultMap.put("code", 0);
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
             resultMap.put("message", "接口调用失败，请重试！！");
             return resultMap;
         }
@@ -262,11 +262,6 @@ public class StatisticAnalyseController {
             }
         }
 
-        //默认查询前8天到昨天的数据
-//        String endPublishTime = new SimpleDateFormat("yyyy-MM-dd").format((new DateTime()).minusDays(1).withHourOfDay(23).
-//                withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999).toDate());
-//        String startPublishTime = new SimpleDateFormat("yyyy-MM-dd").format((new DateTime()).minusDays(7).withHourOfDay(0).
-//                withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).toDate());
         String startPublishTime = "";
         String endPublishTime = "";
 
@@ -299,7 +294,7 @@ public class StatisticAnalyseController {
             return statisticAnalyseService.getTotalUserByOriginId(orginIdStr, appFlag, searchBeginDay, searchEndDay);
         } catch (Exception e) {
             logger.error("getStatisticAnalyse运营分析接口调用失败-发生未知错误", e);
-            resultMap.put("code", 0);
+            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
             resultMap.put("message", "接口调用失败，请重试！！");
             return resultMap;
         }

@@ -10,30 +10,23 @@ import com.hubpd.bigscreen.service.origin_return.OriginReturnRecordService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
 import com.hubpd.bigscreen.service.uar_profile.UarBasicTaskOrginService;
+import com.hubpd.bigscreen.service.uar_profile.UarTagService;
 import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
-import com.hubpd.bigscreen.utils.*;
-import com.hubpd.bigscreen.vo.UserAnalyseRegionVO;
+import com.hubpd.bigscreen.utils.DateUtils;
+import com.hubpd.bigscreen.utils.ESConfigConstants;
+import com.hubpd.bigscreen.utils.ErrorCode;
+import com.hubpd.bigscreen.utils.ProfileESClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
-import org.springframework.data.elasticsearch.core.ResultsExtractor;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -62,6 +55,8 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
     private UarBasicTaskOrginService uarBasicTaskOrginService;
     @Autowired
     private UarBasicAppinfoService uarBasicAppinfoService;
+    @Autowired
+    private UarTagService uarTagService;
 
     /**
      * 用户分析接口，计算性别，青老中，前5地域
@@ -132,15 +127,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             resultMap.put("code", 0);
             resultMap.put("data", JSON.parse(originReturnRecordStr));
             return resultMap;
-        }
-
-
-        // 对于指定机构在指定查询日期的返回数据，进行mysql数据库的缓存
-        String returnDate = originReturnRecordService.findOriginReturnRecordByOriginId(orginId, currentDateStr);
-
-        if (StringUtils.isNotBlank(returnDate)) {
-            resultMap.put("code", 0);
-            resultMap.put("data", returnDate);
         } else {
             List<Map<String, Object>> dataListMap = new ArrayList<Map<String, Object>>();
             Set<String> appKeyByLesseeIdAndAppType = uarBasicAppinfoService.getAppKeyByLesseeIdAndAppType(orginId, null);
@@ -164,8 +150,6 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             resultMap.put("code", 0);
             resultMap.put("data", JSON.toJSONString(dataListMap));
         }
-
-
         return resultMap;
     }
 
@@ -208,6 +192,9 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
                 List<Map<String, Object>> resultCityRegion = getAggregationsCity(appKeyByLesseeIdAndAppType);
                 genderAndAgeAndRegionMap.put("region", resultCityRegion);
             }
+            //top10标签聚合
+            genderAndAgeAndRegionMap.put("top10Tag", getAggregationsTagsTopN(appKeyByLesseeIdAndAppType, 10));
+
             dataListMap.add(genderAndAgeAndRegionMap);
         }
     }
@@ -296,6 +283,53 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             e.printStackTrace();
         }
         return resultProvinceRegion;
+    }
+
+    /**
+     * 对省份进行聚合查询
+     *
+     * @param atSet appkey应用标识
+     * @return
+     */
+    public List<Map<String, Object>> getAggregationsTagsTopN(Set<String> atSet, Integer topN) {
+        List<Map<String, Object>> resultTopNTags = new ArrayList<Map<String, Object>>();
+
+        TransportClient client = null;
+        try {
+            client = ProfileESClient.getClientIns();
+            BoolQueryBuilder builder = QueryBuilders.boolQuery();
+            builder.must(atQuery(atSet));
+            builder.must(QueryBuilders.rangeQuery("tag_count").gt(0));
+
+            AggregationBuilder agg = AggregationBuilders.terms("Tag_top")
+                    .field("fav_ids").size(topN);
+
+            SearchResponse sr = client
+                    .prepareSearch(ESConfigConstants.ES_PROFILE_INDEX_OFFLINE_USER_PROFILE)
+                    .setTypes(ESConfigConstants.ES_PROFILE_TYPE_USER_TAGS)
+                    .setQuery(
+                            QueryBuilders.boolQuery()
+                                    .filter(builder)
+                    ).setSize(0).addAggregation(agg)
+                    .execute().actionGet();
+
+            Terms aggTerms = sr.getAggregations().get("Tag_top");
+            List<Terms.Bucket> tags = aggTerms.getBuckets();
+            for (Terms.Bucket tag : tags) {
+                Map<String, Object> tmpMap = new HashMap<String, Object>();
+                String tag_id = tag.getKeyAsString();
+
+                String tag_name = uarTagService.getTagNameByTagId(Integer.parseInt(tag_id));
+                tmpMap.put("tagName", tag_name);
+                tmpMap.put("num", tag.getDocCount());
+
+                resultTopNTags.add(tmpMap);
+            }
+        } catch (IOException e) {
+            logger.error("es配置信息错误");
+            e.printStackTrace();
+        }
+        return resultTopNTags;
     }
 
     /**

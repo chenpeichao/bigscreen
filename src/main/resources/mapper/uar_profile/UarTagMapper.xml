@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_profile.UarTagMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_profile.UarTag">
+        <id column="tag_id" property="tagId" jdbcType="INTEGER"/>
+        <result column="tag" property="tag" jdbcType="VARCHAR"/>
+        <result column="tag_tw" property="tagTw" jdbcType="VARCHAR"/>
+        <result column="tag_en" property="tagEn" jdbcType="VARCHAR"/>
+        <result column="parent_tag_id" property="parentTagId" jdbcType="INTEGER"/>
+        <result column="tag_type" property="tagType" jdbcType="INTEGER"/>
+        <result column="owner_app_id" property="ownerAppId" jdbcType="INTEGER"/>
+        <result column="describe" property="describe" jdbcType="VARCHAR"/>
+        <result column="last_modify" property="lastModify" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        tag_id, tag, tag_tw, tag_en, parent_tag_id, tag_type, owner_app_id, describe, last_modify
+    </sql>
+
+
+    <select id="getTagNameByTagId" resultType="java.lang.String" parameterType="java.lang.Integer">
+        select
+        tag
+        from uar_tag
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </select>
+
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from uar_tag
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from uar_tag
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarTag">
+        insert into uar_tag (tag_id, tag, tag_tw,
+        tag_en, parent_tag_id, tag_type,
+        owner_app_id, describe, last_modify
+        )
+        values (#{tagId,jdbcType=INTEGER}, #{tag,jdbcType=VARCHAR}, #{tagTw,jdbcType=VARCHAR},
+        #{tagEn,jdbcType=VARCHAR}, #{parentTagId,jdbcType=INTEGER}, #{tagType,jdbcType=INTEGER},
+        #{ownerAppId,jdbcType=INTEGER}, #{describe,jdbcType=VARCHAR}, #{lastModify,jdbcType=TIMESTAMP}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarTag">
+        insert into uar_tag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tagId != null">
+                tag_id,
+            </if>
+            <if test="tag != null">
+                tag,
+            </if>
+            <if test="tagTw != null">
+                tag_tw,
+            </if>
+            <if test="tagEn != null">
+                tag_en,
+            </if>
+            <if test="parentTagId != null">
+                parent_tag_id,
+            </if>
+            <if test="tagType != null">
+                tag_type,
+            </if>
+            <if test="ownerAppId != null">
+                owner_app_id,
+            </if>
+            <if test="describe != null">
+                describe,
+            </if>
+            <if test="lastModify != null">
+                last_modify,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tagId != null">
+                #{tagId,jdbcType=INTEGER},
+            </if>
+            <if test="tag != null">
+                #{tag,jdbcType=VARCHAR},
+            </if>
+            <if test="tagTw != null">
+                #{tagTw,jdbcType=VARCHAR},
+            </if>
+            <if test="tagEn != null">
+                #{tagEn,jdbcType=VARCHAR},
+            </if>
+            <if test="parentTagId != null">
+                #{parentTagId,jdbcType=INTEGER},
+            </if>
+            <if test="tagType != null">
+                #{tagType,jdbcType=INTEGER},
+            </if>
+            <if test="ownerAppId != null">
+                #{ownerAppId,jdbcType=INTEGER},
+            </if>
+            <if test="describe != null">
+                #{describe,jdbcType=VARCHAR},
+            </if>
+            <if test="lastModify != null">
+                #{lastModify,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarTag">
+        update uar_tag
+        <set>
+            <if test="tag != null">
+                tag = #{tag,jdbcType=VARCHAR},
+            </if>
+            <if test="tagTw != null">
+                tag_tw = #{tagTw,jdbcType=VARCHAR},
+            </if>
+            <if test="tagEn != null">
+                tag_en = #{tagEn,jdbcType=VARCHAR},
+            </if>
+            <if test="parentTagId != null">
+                parent_tag_id = #{parentTagId,jdbcType=INTEGER},
+            </if>
+            <if test="tagType != null">
+                tag_type = #{tagType,jdbcType=INTEGER},
+            </if>
+            <if test="ownerAppId != null">
+                owner_app_id = #{ownerAppId,jdbcType=INTEGER},
+            </if>
+            <if test="describe != null">
+                describe = #{describe,jdbcType=VARCHAR},
+            </if>
+            <if test="lastModify != null">
+                last_modify = #{lastModify,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_profile.UarTag">
+        update uar_tag
+        set tag = #{tag,jdbcType=VARCHAR},
+        tag_tw = #{tagTw,jdbcType=VARCHAR},
+        tag_en = #{tagEn,jdbcType=VARCHAR},
+        parent_tag_id = #{parentTagId,jdbcType=INTEGER},
+        tag_type = #{tagType,jdbcType=INTEGER},
+        owner_app_id = #{ownerAppId,jdbcType=INTEGER},
+        describe = #{describe,jdbcType=VARCHAR},
+        last_modify = #{lastModify,jdbcType=TIMESTAMP}
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </update>
+</mapper>
