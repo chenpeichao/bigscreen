@@ -140,7 +140,7 @@
         </root>
         <root level="INFO">
             <appender-ref ref="FILEINFO"/>
-            <!-- <appender-ref ref="CONSOLE"/> -->
+            <!--<appender-ref ref="CONSOLE"/>-->
         </root>
     </springProfile>
 </configuration>

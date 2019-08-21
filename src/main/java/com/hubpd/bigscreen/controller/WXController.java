@@ -365,8 +365,8 @@ public class WXController {
             //排序集合封装，用于验证前台传递排序字段
             ArrayList<String> sortNameList = new ArrayList<String>();
             sortNameList.add("publishTime");
-            sortNameList.add("readNum");
-            sortNameList.add("likeNum");
+            sortNameList.add("readTotal");
+            sortNameList.add("likeTotal");
 
             //默认查询前8天到昨天的数据
             String endPublishTime = new SimpleDateFormat("yyyy-MM-dd").format((new DateTime()).minusDays(1).withHourOfDay(23).

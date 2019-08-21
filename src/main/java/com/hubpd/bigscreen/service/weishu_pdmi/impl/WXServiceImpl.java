@@ -16,6 +16,7 @@ import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
 import com.hubpd.bigscreen.vo.WXArticleAnalyseVO;
 import com.hubpd.bigscreen.vo.WXUserAnalyseVO;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -339,6 +340,12 @@ public class WXServiceImpl implements WXService {
         if (null != pubAccountIdListByUserIdList && pubAccountIdListByUserIdList.size() > 0) {
             pubArticleDTOPage = articleService.getPubArticlelist(pubAccountIdListByUserIdList, headType, startPublishTime, endPublishTime, sortName, sortBy);
         }
+        if (null != pubArticleDTOPage && null != pubArticleDTOPage.getResult() && pubArticleDTOPage.getResult().size() > 0) {
+            for (PubArticleDTO pubArticleDTO : pubArticleDTOPage.getResult()) {
+                pubArticleDTO.setPublishTime(StringUtils.isNotBlank(pubArticleDTO.getPublishTime()) ? pubArticleDTO.getPublishTime().substring(0, 19) : "");
+            }
+        }
+
         return pubArticleDTOPage;
     }
 }
