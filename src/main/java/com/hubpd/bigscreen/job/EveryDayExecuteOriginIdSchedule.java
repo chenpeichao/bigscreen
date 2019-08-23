@@ -2,13 +2,10 @@ package com.hubpd.bigscreen.job;
 
 import com.hubpd.bigscreen.service.common.TaskGetUserAnalyseService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
-import com.hubpd.bigscreen.service.uar_profile.UserAnalyseService;
-import com.hubpd.bigscreen.service.uar_profile.impl.UserAnalyseServiceImpl;
 import com.hubpd.bigscreen.utils.Constants;
 import com.hubpd.bigscreen.utils.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +28,8 @@ public class EveryDayExecuteOriginIdSchedule {
     @Autowired
     private TaskGetUserAnalyseService taskGetUserAnalyseService;
 
-    //    @Scheduled(fixedRate = 1000 * 60 * 250)
-    @Scheduled(cron = "0 0 5 * * ?")
+    //        @Scheduled(fixedRate = 1000 * 60 * 250)
+    @Scheduled(cron = "0 20 6 * * ?")
     public void addTask() {
         //查询大屏中缓存的所有有效的组织机构id列表
         List<String> allOriginIdList = uarBasicUserService.findAllOriginIdListInBigscreen();

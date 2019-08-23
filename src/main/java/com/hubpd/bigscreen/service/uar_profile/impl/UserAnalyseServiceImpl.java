@@ -172,6 +172,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             genderMap.put("femaleNum", female);
             genderMap.put("maleNum", maleNum);
             genderTmpListMap.add(genderMap);
+            logger.info("应用appkeySet为【" + appKeyByLesseeIdAndAppType + "】的男女数据打印完成【" + genderTmpListMap.toString() + "】");
             genderAndAgeAndRegionMap.put("gender", genderTmpListMap);
             Long young = getTotalElements(appKeyByLesseeIdAndAppType, "age", "青年");
             Long middleNum = getTotalElements(appKeyByLesseeIdAndAppType, "age", "中年");
@@ -181,6 +182,7 @@ public class UserAnalyseServiceImpl implements UserAnalyseService {
             ageMap.put("oldNum", oldNum);
             List<Map<String, Object>> ageTmpListMap = new ArrayList<Map<String, Object>>();
             ageTmpListMap.add(ageMap);
+            logger.info("应用appkeySet为【" + appKeyByLesseeIdAndAppType + "】的青中老年数据打印完成【" + ageTmpListMap.toString() + "】");
             genderAndAgeAndRegionMap.put("age", ageTmpListMap);
 
             if (StringUtils.isNotBlank(regionLevel) && "province".equals(regionLevel)) {
