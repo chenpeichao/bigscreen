@@ -232,7 +232,7 @@ public class StatisticAnalyseController {
 
         String orginIdStr = StringUtils.isNotBlank(request.getParameter("orginId")) ? request.getParameter("orginId").trim() : request.getParameter("orginId");
         String appFlagStr = StringUtils.isNotBlank(request.getParameter("appFlag")) ? request.getParameter("appFlag").trim() : request.getParameter("appFlag");
-        String searchBeginDateStr = StringUtils.isNotBlank(request.getParameter("startSearchDate")) ? request.getParameter("startSearchDate").trim() : request.getParameter("startSearchDate");
+        String searchBeginDateStr = StringUtils.isNotBlank(request.getParameter("startSearchDate")) ? request.getParameter("startSearchDate").trim() : "2017-01-01";
         String searchEndDateStr = StringUtils.isNotBlank(request.getParameter("endSearchDate")) ? request.getParameter("endSearchDate").trim() : request.getParameter("endSearchDate");
 
         if (StringUtils.isBlank(orginIdStr)) {

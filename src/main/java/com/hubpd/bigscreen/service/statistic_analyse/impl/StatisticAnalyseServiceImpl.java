@@ -366,12 +366,13 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         Map<String, Long> totalUserMap = new HashMap<String, Long>();
         if (Constants.UAR_APP_TYPE_APP.equals(appFlag)) {
             //客户端的需要先查询截止日期的总用户，在查询开始日期的总用户数
-            Long beginTotalUser = appActivityUserAtDayService.getTotalUserByAppKeySetAndSearchDay(appKeyByLesseeIdAndAppType, searchBeginDay);
+            searchBeginDay = Long.parseLong(DateUtils.getYesterdayDateStr(searchBeginDay + "", "yyyyMMdd", "yyyyMMdd"));
+            Long beginDayBeforeOnDayTotalUser = appActivityUserAtDayService.getTotalUserByAppKeySetAndSearchDay(appKeyByLesseeIdAndAppType, searchBeginDay);
             Long endTotalUser = appActivityUserAtDayService.getTotalUserByAppKeySetAndSearchDay(appKeyByLesseeIdAndAppType, searchEndDay);
-            if (null == searchBeginDay || searchBeginDay == 0) {
+            if (null == searchBeginDay || searchBeginDay == 0 || searchBeginDay < 20170101) {
                 totalUserMap.put("totalUser", endTotalUser);
             } else {
-                totalUserMap.put("totalUser", endTotalUser - beginTotalUser);
+                totalUserMap.put("totalUser", endTotalUser - beginDayBeforeOnDayTotalUser);
             }
         } else {
             totalUserMap.put("totalUser", webAtCLNDayService.getTotalUserByOriginId(appKeyByLesseeIdAndAppType, searchBeginDay, searchEndDay));

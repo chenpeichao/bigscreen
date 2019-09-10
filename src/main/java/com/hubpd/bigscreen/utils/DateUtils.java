@@ -3,6 +3,7 @@ package com.hubpd.bigscreen.utils;
 import com.sun.xml.internal.ws.util.UtilException;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,4 +64,35 @@ public class DateUtils {
             throw new UtilException(e);
         }
     }
+
+    /**
+     * 得到指定日期字符串的前一天指定格式的时间字符串
+     *
+     * @param sourceDateStr 原始日期
+     * @param sourcePattern 原始日期格式
+     * @param targetPattern 目标日期格式字符串
+     * @return
+     */
+    public static String getYesterdayDateStr(String sourceDateStr, String sourcePattern, String targetPattern) {
+        SimpleDateFormat sourceSdf = new SimpleDateFormat(sourcePattern);
+        SimpleDateFormat targetSdf = new SimpleDateFormat(targetPattern);
+        try {
+            return targetSdf.format(DateUtils.addDay(sourceSdf.parse(sourceDateStr), -1));
+        } catch (ParseException e) {
+            throw new UtilException(e);
+        }
+    }
+
+    /**
+     * 日加减 by spt
+     *
+     * @return
+     */
+    public static Date addDay(Date date, int n) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, n);
+        return c.getTime();
+    }
+
 }
