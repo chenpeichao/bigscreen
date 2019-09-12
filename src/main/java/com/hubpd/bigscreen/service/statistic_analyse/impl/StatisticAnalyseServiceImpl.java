@@ -34,6 +34,7 @@ import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -63,6 +64,9 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
     private WebAtCLNDayService webAtCLNDayService;
     @Autowired
     private AppActivityUserAtDayService appActivityUserAtDayService;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 根据机构id和查询时间查询pv、uv以及crt的相关原创数和转载数---默认查询昨天
@@ -362,6 +366,12 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
             return resultMap;
         }
         logger.info("机构【" + orginId + "】的appKey的集合为" + appKeyByLesseeIdAndAppType.toString());
+
+        for (String appKey : appKeyByLesseeIdAndAppType) {
+            String uv = redisTemplate.opsForValue().get("wbeh_today_summary-" + appKey + "-20190912_uv");
+            String pv = redisTemplate.opsForValue().get("wbeh_today_summary-" + appKey + "-20190912_pv");
+            System.out.println(appKey + "的统计信息为" + uv + "====" + pv);
+        }
 
         Map<String, Long> totalUserMap = new HashMap<String, Long>();
         if (Constants.UAR_APP_TYPE_APP.equals(appFlag)) {

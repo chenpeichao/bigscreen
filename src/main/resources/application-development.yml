@@ -41,7 +41,19 @@ uar_statistic:
 
 # es画像生产环境库--用于兼容老的画像接口
 spring:
-     data:
-        elasticsearch: #ElasticsearchProperties
-            cluster-name: elasticsearch_uar
-            cluster-nodes: 10.101.67.5:9300
+   data:
+      elasticsearch: #ElasticsearchProperties
+          cluster-name: elasticsearch_uar
+          cluster-nodes: 10.101.67.5:9300
+# Redis服务器连接密码（默认为空）---生产环境
+  redis:
+      password:
+      cluster:
+          nodes: 10.101.67.4:7000,10.101.67.5:7000,10.101.67.6:7000
+      pool:
+          max-active: 8
+          max-wait: 3000
+          max-idle: 8
+          min-idle: 0
+      timeout: 0
+      commandTimeout: 3000
