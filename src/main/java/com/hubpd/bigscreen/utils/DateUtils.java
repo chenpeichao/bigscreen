@@ -95,4 +95,38 @@ public class DateUtils {
         return c.getTime();
     }
 
+    /**
+     * 获取查询时间指定相差天数的日期字符串
+     *
+     * @param searchDateStr 查询日期字符串
+     * @param rangeDay      相差天数
+     * @param sourcePattern 查询日期字符串格式
+     * @param targetPattern 结果日期字符串格式
+     * @return
+     */
+    public static String getRangeDay(String searchDateStr, Integer rangeDay, String sourcePattern, String targetPattern) {
+        Calendar no = Calendar.getInstance();
+        try {
+            no.setTime(new SimpleDateFormat(sourcePattern).parse(searchDateStr));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        no.set(Calendar.DATE, no.get(Calendar.DATE) + rangeDay);
+        return new SimpleDateFormat(targetPattern).format(no.getTime());
+    }
+
+    /**
+     * 获取查询时间指定相差天数的日期字符串
+     *
+     * @param date          查询日期
+     * @param rangeDay      相差天数
+     * @param targetPattern 结果日期字符串格式
+     * @return
+     */
+    public static String getRangeDay(Date date, Integer rangeDay, String targetPattern) {
+        Calendar no = Calendar.getInstance();
+        no.setTime(date);
+        no.set(Calendar.DATE, no.get(Calendar.DATE) + rangeDay);
+        return new SimpleDateFormat(targetPattern).format(no.getTime());
+    }
 }

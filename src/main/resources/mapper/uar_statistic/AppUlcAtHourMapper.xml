@@ -11,6 +11,20 @@
     <sql id="Base_Column_List">
         at, day, hour, n_user, activity_user
     </sql>
+
+    <!--获取指定appkey集合的今日新增用户数-->
+    <select id="getTodayNewUser" resultType="java.lang.Long" parameterType="map">
+        SELECT
+        IFNULL(SUM(n_user),0)
+        FROM app_ulc_at_hour
+        WHERE AT IN
+        <foreach collection="appKeySet" item="appKey"
+                 index="index" open="(" close=")" separator=",">
+            #{appKey}
+        </foreach>
+        AND DAY = DATE_FORMAT(CURRENT_DATE, '%Y%m%d')
+    </select>
+
     <select id="selectByPrimaryKey" resultMap="BaseResultMap"
             parameterType="com.hubpd.bigscreen.bean.uar_statistic.AppUlcAtHourKey">
         select

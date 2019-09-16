@@ -40,4 +40,12 @@ public interface StatisticAnalyseService {
      * @return
      */
     public Map<String, Object> getTotalUserByOriginId(String orginId, Integer appFlag, Long searchBeginDay, Long searchEndDay);
+
+    /**
+     * 获取运营分析统计概览数据
+     *
+     * @param orginId 租户id
+     * @return
+     */
+    public Map<String, Object> getStatisticAnalyseOverview(String orginId);
 }

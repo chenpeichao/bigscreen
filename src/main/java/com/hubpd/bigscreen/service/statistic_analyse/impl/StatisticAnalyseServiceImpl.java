@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hubpd.bigscreen.bean.uar_basic.UarBasicAppinfo;
 import com.hubpd.bigscreen.bean.uar_statistic.UarStatisticWebAtDay;
+import com.hubpd.bigscreen.dto.AppAtDayDTO;
 import com.hubpd.bigscreen.dto.CrtOriginAndTraceCountDTO;
 import com.hubpd.bigscreen.dto.UarAppkeyAndCrtMediaIdDTO;
+import com.hubpd.bigscreen.dto.WebAtHourDTO;
 import com.hubpd.bigscreen.mapper.uar_statistic.UarStatisticWebAtDayMapper;
-import com.hubpd.bigscreen.service.statistic_analyse.AppActivityUserAtDayService;
-import com.hubpd.bigscreen.service.statistic_analyse.StatisticAnalyseService;
-import com.hubpd.bigscreen.service.statistic_analyse.WebAtCLNDayService;
+import com.hubpd.bigscreen.service.statistic_analyse.*;
 import com.hubpd.bigscreen.service.uar_basic.MediaService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicAppinfoService;
 import com.hubpd.bigscreen.service.uar_basic.UarBasicUserService;
@@ -64,6 +64,12 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
     private WebAtCLNDayService webAtCLNDayService;
     @Autowired
     private AppActivityUserAtDayService appActivityUserAtDayService;
+    @Autowired
+    private WebAtHourService webAtHourService;
+    @Autowired
+    private AppUlcAtHourService appUlcAtHourService;
+    @Autowired
+    private AppAtDayService appAtDayService;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -367,12 +373,6 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         }
         logger.info("机构【" + orginId + "】的appKey的集合为" + appKeyByLesseeIdAndAppType.toString());
 
-        for (String appKey : appKeyByLesseeIdAndAppType) {
-            String uv = redisTemplate.opsForValue().get("wbeh_today_summary-" + appKey + "-20190912_uv");
-            String pv = redisTemplate.opsForValue().get("wbeh_today_summary-" + appKey + "-20190912_pv");
-            System.out.println(appKey + "的统计信息为" + uv + "====" + pv);
-        }
-
         Map<String, Long> totalUserMap = new HashMap<String, Long>();
         if (Constants.UAR_APP_TYPE_APP.equals(appFlag)) {
             //客户端的需要先查询截止日期的总用户，在查询开始日期的总用户数
@@ -394,6 +394,99 @@ public class StatisticAnalyseServiceImpl implements StatisticAnalyseService {
         return resultMap;
     }
 
+    /**
+     * 获取运营分析统计概览数据
+     *
+     * @param orginId 租户id
+     * @return
+     */
+    public Map<String, Object> getStatisticAnalyseOverview(String orginId) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> dataMap = new HashMap<String, Object>();
+        Map<String, Object> webDataMap = new HashMap<String, Object>();
+        Map<String, Object> appDataMap = new HashMap<String, Object>();
+        String currentDay = DateUtils.getDateStrByDate(new Date(), "yyyyMMdd");
+        String yesterdayDay = DateUtils.getRangeDay(currentDay, -1, "yyyyMMdd", "yyyyMMdd");
+        String lastWeekDay = DateUtils.getRangeDay(currentDay, -7, "yyyyMMdd", "yyyyMMdd");
+
+        logger.info("上周的日期为" + lastWeekDay);
+
+        if (null == mediaService.findMediaByOrgId(orginId)) {
+            resultMap.put("code", ErrorCode.ERROR_CODE_NOT_FOUND_MEDIA_ID);
+            resultMap.put("message", "系统中不存在指定机构");
+            return resultMap;
+        }
+
+        Set<String> appKeyListByApp = uarBasicAppinfoService.getAppKeyByLesseeIdAndAppType(orginId, Constants.UAR_APP_TYPE_APP);
+        Set<String> appKeyListByWeb = uarBasicAppinfoService.getAppKeyByLesseeIdAndAppType(orginId, Constants.UAR_APP_TYPE_WEB);
+
+        if ((null == appKeyListByApp || appKeyListByApp.size() == 0) && (null == appKeyListByWeb || appKeyListByWeb.size() == 0)) {
+            resultMap.put("code", 0);
+            resultMap.put("data", dataMap);
+            return resultMap;
+        }
+
+        Long todayWebUV = 0l;
+        Long todayWebPV = 0l;
+        Long todayAppActiveUV = 0l;
+
+        //首先从redis中获取今日的统计数据
+        for (String appKey : appKeyListByWeb) {
+            String uv = redisTemplate.opsForValue().get("wbeh_today_summary-" + appKey + "-" + currentDay + "_uv");
+            String pv = redisTemplate.opsForValue().get("wbeh_today_summary-" + appKey + "-" + currentDay + "_pv");
+            todayWebUV += StringUtils.isNotBlank(uv) ? Long.parseLong(uv) : 0l;
+            todayWebPV += StringUtils.isNotBlank(pv) ? Long.parseLong(pv) : 0l;
+            logger.info("网站---" + appKey + "的redis统计信息为uv-->" + uv + "====pv-->" + pv);
+        }
+
+        for (String appKey : appKeyListByApp) {
+            String uv = redisTemplate.opsForValue().get("abeh_today_summary-" + appKey + "-" + currentDay + "_uv");
+            String pv = redisTemplate.opsForValue().get("abeh_today_summary-" + appKey + "-" + currentDay + "_pv");
+            todayAppActiveUV += StringUtils.isNotBlank(uv) ? Long.parseLong(uv) : 0l;
+            logger.info("客户端---" + appKey + "的redis统计信息为uv-->" + uv + "====pv-->" + pv);
+        }
+
+        //从mysql中获取昨日及以前日期的统计数据
+        WebAtHourDTO statYesterdayByWeb = new WebAtHourDTO();
+        WebAtHourDTO statlastWeekByWeb = new WebAtHourDTO();
+        if (null != appKeyListByWeb && appKeyListByWeb.size() > 0) {
+            Integer maxHour = webAtHourService.getCurrentDayMaxHour(appKeyListByWeb);
+            statYesterdayByWeb = webAtHourService.getStatByAppkeyAndDayAndBeforeHour(appKeyListByWeb, yesterdayDay, maxHour + "");
+            statlastWeekByWeb = webAtHourService.getStatByAppkeyAndDayAndBeforeHour(appKeyListByWeb, lastWeekDay, maxHour + "");
+        }
+
+        webDataMap.put("todayWebPV", todayWebPV);
+        webDataMap.put("todayWebUV", todayWebUV);
+        webDataMap.put("yesterdayWebPV", statYesterdayByWeb.getPv() == null ? 0 : statYesterdayByWeb.getPv());
+        webDataMap.put("yesterdayWebUV", statYesterdayByWeb.getUv() == null ? 0 : statYesterdayByWeb.getUv());
+        webDataMap.put("lastWeekWebPV", statlastWeekByWeb.getPv() == null ? 0 : statlastWeekByWeb.getPv());
+        webDataMap.put("lastWeekWebUV", statlastWeekByWeb.getUv() == null ? 0 : statlastWeekByWeb.getUv());
+        dataMap.put("webStatDate", webDataMap);
+
+
+        Long todayAppNewUV = 0l;
+        //从mysql中获取昨日及以前日期的统计数据
+        AppAtDayDTO statYesterdayByApp = new AppAtDayDTO();
+        AppAtDayDTO statlastWeekByApp = new AppAtDayDTO();
+        if (null != appKeyListByApp && appKeyListByApp.size() > 0) {
+            todayAppNewUV = appUlcAtHourService.getTodayNewUser(appKeyListByApp);
+            statYesterdayByApp = appAtDayService.getNewUVAndActiveUVByAppKeySetAndDay(appKeyListByApp, yesterdayDay);
+            statlastWeekByApp = appAtDayService.getNewUVAndActiveUVByAppKeySetAndDay(appKeyListByWeb, lastWeekDay);
+        }
+
+        appDataMap.put("todayAppActiveUV", todayAppActiveUV);
+        appDataMap.put("todayAppNewUV", todayAppNewUV);
+        appDataMap.put("yesterdayAppActiveUV", statYesterdayByApp.getActiveUV() == null ? 0 : statYesterdayByApp.getActiveUV());
+        appDataMap.put("yesterdayAppNewUV", statYesterdayByApp.getNewUV() == null ? 0 : statYesterdayByApp.getNewUV());
+        appDataMap.put("lastWeekAppActiveUV", statlastWeekByApp.getActiveUV() == null ? 0 : statlastWeekByApp.getActiveUV());
+        appDataMap.put("lastWeekAppNewUV", statlastWeekByApp.getNewUV() == null ? 0 : statlastWeekByApp.getNewUV());
+        dataMap.put("appStatDate", appDataMap);
+
+        resultMap.put("code", 0);
+        resultMap.put("data", dataMap);
+
+        return resultMap;
+    }
 
 
     private List<Map<String, Object>> getTopNArticleInWebAndApp(Set<String> atSet, Long from, Long to, Integer topN) {

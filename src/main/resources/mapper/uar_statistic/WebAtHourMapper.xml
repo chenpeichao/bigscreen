@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hubpd.bigscreen.mapper.uar_statistic.WebAtHourMapper">
+    <resultMap id="BaseResultMap" type="com.hubpd.bigscreen.bean.uar_statistic.WebAtHour">
+        <id column="at" property="at" jdbcType="VARCHAR"/>
+        <id column="day" property="day" jdbcType="INTEGER"/>
+        <id column="hour" property="hour" jdbcType="INTEGER"/>
+        <result column="pv" property="pv" jdbcType="INTEGER"/>
+        <result column="uv" property="uv" jdbcType="INTEGER"/>
+        <result column="visit" property="visit" jdbcType="INTEGER"/>
+        <result column="visittime" property="visittime" jdbcType="REAL"/>
+        <result column="exit_visit" property="exitVisit" jdbcType="INTEGER"/>
+        <result column="visitcount" property="visitcount" jdbcType="REAL"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        at, day, hour, pv, uv, visit, visittime, exit_visit, visitcount
+    </sql>
+
+    <!--获取当天统计的最大小时时间-->
+    <select id="getCurrentDayMaxHour" resultType="java.lang.Integer" parameterType="map">
+        select
+        IFNULL(MAX(HOUR), 0) AS 'maxHour'
+        from web_at_hour
+        WHERE at in
+        <foreach collection="appKeySet" item="appKey"
+                 index="index" open="(" close=")" separator=",">
+            #{appKey}
+        </foreach>
+        and DAY = DATE_FORMAT(CURRENT_DATE, '%Y%m%d')
+    </select>
+
+    <!--获取指定应用集合在指定时间的统计数据-->
+    <select id="getStatByAppkeyAndDayAndBeforeHour" resultType="com.hubpd.bigscreen.dto.WebAtHourDTO"
+            parameterType="map">
+        select
+        IFNULL(sum(pv), 0) as 'pv',
+        IFNULL(sum(uv), 0) as 'uv',
+        IFNULL(MAX(HOUR), 0) AS 'maxHour'
+        from web_at_hour
+        WHERE at in
+        <foreach collection="appKeySet" item="appKey"
+                 index="index" open="(" close=")" separator=",">
+            #{appKey}
+        </foreach>
+        <if test="day !=null and day != ''">
+            and day = #{day}
+        </if>
+        <if test="hour !=null and hour != ''">
+            <![CDATA[
+        and hour <= #{hour}
+      ]]>
+        </if>
+    </select>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap"
+            parameterType="com.hubpd.bigscreen.bean.uar_statistic.WebAtHourKey">
+        select
+        <include refid="Base_Column_List"/>
+        from web_at_hour
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+        and hour = #{hour,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_statistic.WebAtHourKey">
+        delete from web_at_hour
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+        and hour = #{hour,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.hubpd.bigscreen.bean.uar_statistic.WebAtHour">
+        insert into web_at_hour (at, day, hour,
+        pv, uv, visit, visittime,
+        exit_visit, visitcount)
+        values (#{at,jdbcType=VARCHAR}, #{day,jdbcType=INTEGER}, #{hour,jdbcType=INTEGER},
+        #{pv,jdbcType=INTEGER}, #{uv,jdbcType=INTEGER}, #{visit,jdbcType=INTEGER}, #{visittime,jdbcType=REAL},
+        #{exitVisit,jdbcType=INTEGER}, #{visitcount,jdbcType=REAL})
+    </insert>
+    <insert id="insertSelective" parameterType="com.hubpd.bigscreen.bean.uar_statistic.WebAtHour">
+        insert into web_at_hour
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="at != null">
+                at,
+            </if>
+            <if test="day != null">
+                day,
+            </if>
+            <if test="hour != null">
+                hour,
+            </if>
+            <if test="pv != null">
+                pv,
+            </if>
+            <if test="uv != null">
+                uv,
+            </if>
+            <if test="visit != null">
+                visit,
+            </if>
+            <if test="visittime != null">
+                visittime,
+            </if>
+            <if test="exitVisit != null">
+                exit_visit,
+            </if>
+            <if test="visitcount != null">
+                visitcount,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="at != null">
+                #{at,jdbcType=VARCHAR},
+            </if>
+            <if test="day != null">
+                #{day,jdbcType=INTEGER},
+            </if>
+            <if test="hour != null">
+                #{hour,jdbcType=INTEGER},
+            </if>
+            <if test="pv != null">
+                #{pv,jdbcType=INTEGER},
+            </if>
+            <if test="uv != null">
+                #{uv,jdbcType=INTEGER},
+            </if>
+            <if test="visit != null">
+                #{visit,jdbcType=INTEGER},
+            </if>
+            <if test="visittime != null">
+                #{visittime,jdbcType=REAL},
+            </if>
+            <if test="exitVisit != null">
+                #{exitVisit,jdbcType=INTEGER},
+            </if>
+            <if test="visitcount != null">
+                #{visitcount,jdbcType=REAL},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hubpd.bigscreen.bean.uar_statistic.WebAtHour">
+        update web_at_hour
+        <set>
+            <if test="pv != null">
+                pv = #{pv,jdbcType=INTEGER},
+            </if>
+            <if test="uv != null">
+                uv = #{uv,jdbcType=INTEGER},
+            </if>
+            <if test="visit != null">
+                visit = #{visit,jdbcType=INTEGER},
+            </if>
+            <if test="visittime != null">
+                visittime = #{visittime,jdbcType=REAL},
+            </if>
+            <if test="exitVisit != null">
+                exit_visit = #{exitVisit,jdbcType=INTEGER},
+            </if>
+            <if test="visitcount != null">
+                visitcount = #{visitcount,jdbcType=REAL},
+            </if>
+        </set>
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+        and hour = #{hour,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hubpd.bigscreen.bean.uar_statistic.WebAtHour">
+        update web_at_hour
+        set pv = #{pv,jdbcType=INTEGER},
+        uv = #{uv,jdbcType=INTEGER},
+        visit = #{visit,jdbcType=INTEGER},
+        visittime = #{visittime,jdbcType=REAL},
+        exit_visit = #{exitVisit,jdbcType=INTEGER},
+        visitcount = #{visitcount,jdbcType=REAL}
+        where at = #{at,jdbcType=VARCHAR}
+        and day = #{day,jdbcType=INTEGER}
+        and hour = #{hour,jdbcType=INTEGER}
+    </update>
+</mapper>

@@ -299,38 +299,4 @@ public class StatisticAnalyseController {
             return resultMap;
         }
     }
-
-    /**
-     * 运营分析--概览页统计数据
-     *
-     * @param request
-     * @return
-     */
-    @ResponseBody
-    @GetMapping("/getStatisticAnalyseOverview")
-    public Map<String, Object> getStatisticAnalyseOverview(HttpServletRequest request, HttpServletResponse response) {
-        // 解决跨域问题
-        response.setHeader("Access-Control-Allow-Origin", "*");
-
-        logger.info("调用/statistic/webGeneralView接口request param 【" + request.getQueryString() + "】");
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-
-        String orginIdStr = StringUtils.isNotBlank(request.getParameter("orginId")) ? request.getParameter("orginId").trim() : request.getParameter("orginId");
-
-        if (StringUtils.isBlank(orginIdStr)) {
-            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
-            resultMap.put("message", "request param orginId lack");
-            return resultMap;
-        }
-
-        try {
-//            return statisticAnalyseService.getStatisticAnalyseOverview(orginIdStr);
-            return null;
-        } catch (Exception e) {
-            logger.error("getStatisticAnalyse运营分析接口调用失败-发生未知错误", e);
-            resultMap.put("code", ErrorCode.ERROR_CODE_PARAM_NOT_FOUND);
-            resultMap.put("message", "接口调用失败，请重试！！");
-            return resultMap;
-        }
-    }
 }
